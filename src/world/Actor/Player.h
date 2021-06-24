@@ -359,22 +359,13 @@ namespace Sapphire::Entity
     /*! return the equipment model in a specified equipment slot */
     uint32_t getModelForSlot( Common::GearModelSlot slot );
 
-    /*! add amount to the currency of type */
-    void addCurrency( Common::CurrencyType type, uint32_t amount, bool sendLootMessage = false );
-
-    /*! remove amount from the currency of type */
-    void removeCurrency( Common::CurrencyType type, uint32_t amount );
-
-    /*! return the current amount of crystals of type */
-    uint32_t getCrystal( uint8_t type ) const;
-
     void updateModels( Common::GearSetSlot equipSlotId, const Sapphire::ItemPtr& pItem, bool updateClass );
 
     Common::GearModelSlot equipSlotToModelSlot( Common::GearSetSlot slot );
 
     bool getFreeInventoryContainerSlot( Inventory::InventoryContainerPair& containerPair ) const;
 
-    void insertInventoryItem( Common::InventoryType type, uint16_t slot, const Sapphire::ItemPtr item );
+    void insertInventoryItem( Common::InventoryType type, uint8_t slot, const Sapphire::ItemPtr item );
 
     /*!
     * Collect real item handins from container
@@ -543,7 +534,7 @@ namespace Sapphire::Entity
 
     void clearTeleportQuery();
 
-    void setDyeingInfo( uint32_t itemToDyeContainer, uint32_t itemToDyeSlot, uint32_t dyeBagContainer, uint32_t dyeBagSlot );
+    void setDyeingInfo( Common::InventoryType itemToDyeContainer, uint8_t itemToDyeSlot, Common::InventoryType dyeBagContainer, uint8_t dyeBagSlot );
     void dyeItemFromDyeingInfo();
 
     /*! prepares zoning / fades out the screen */
@@ -738,6 +729,12 @@ namespace Sapphire::Entity
     /*! send the entire inventory sequence */
     void sendInventory();
 
+    /*! send the entire currency / crystal sequence */
+    void sendCurrencyCrystal();
+
+    /*! send the entire extra currency sequence */
+    void sendExtraCurrency();
+
     /*! send active quest list */
     void sendQuestInfo();
 
@@ -917,7 +914,7 @@ namespace Sapphire::Entity
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     void initInventory();
 
-    using InvSlotPair = std::pair< uint16_t, int8_t >;
+    using InvSlotPair = std::pair< Common::InventoryType, int8_t >;
     using InvSlotPairVec = std::vector< InvSlotPair >;
 
     bool loadInventory();
@@ -929,28 +926,25 @@ namespace Sapphire::Entity
     ItemPtr addItem( uint32_t catalogId, uint32_t quantity = 1, bool isHq = false, bool silent = false, bool canMerge = true, bool sendLootMessage = false );
     ItemPtr addItem( ItemPtr itemToAdd, bool silent = false, bool canMerge = true, bool sendLootMessage = false );
 
-    void moveItem( uint16_t fromInventoryId, uint8_t fromSlotId, uint16_t toInventoryId, uint8_t toSlot );
+    void moveItem( Common::InventoryType fromInventoryId, uint8_t fromSlotId, Common::InventoryType toInventoryId, uint8_t toSlot );
 
-    void swapItem( uint16_t fromInventoryId, uint8_t fromSlotId, uint16_t toInventoryId, uint8_t toSlot );
+    void swapItem( Common::InventoryType fromInventoryId, uint8_t fromSlotId, Common::InventoryType toInventoryId, uint8_t toSlot );
 
-    void discardItem( uint16_t fromInventoryId, uint8_t fromSlotId );
+    void discardItem( Common::InventoryType fromInventoryId, uint8_t fromSlotId );
 
-    void splitItem( uint16_t fromInventoryId, uint8_t fromSlotId, uint16_t toInventoryId, uint8_t toSlot,
+    void splitItem( Common::InventoryType fromInventoryId, uint8_t fromSlotId, Common::InventoryType toInventoryId, uint8_t toSlot,
                     uint16_t splitCount );
 
-    void mergeItem( uint16_t fromInventoryId, uint8_t fromSlotId, uint16_t toInventoryId, uint8_t toSlot );
+    void mergeItem( Common::InventoryType fromInventoryId, uint8_t fromSlotId, Common::InventoryType toInventoryId, uint8_t toSlot );
 
-    ItemPtr getItemAt( uint16_t containerId, uint8_t slotId );
+    ItemPtr getItemAt( Common::InventoryType containerId, uint8_t slotId );
 
-    bool updateContainer( uint16_t storageId, uint8_t slotId, ItemPtr pItem );
+    bool updateContainer( Common::InventoryType storageId, uint8_t slotId, ItemPtr pItem );
 
     /*! calculate and return player ilvl based off equipped gear */
     uint16_t calculateEquippedGearItemLevel();
 
     ItemPtr getEquippedWeapon();
-
-    /*! return the current amount of currency of type */
-    uint32_t getCurrency( Common::CurrencyType type );
 
     void writeInventory( Common::InventoryType type );
 
@@ -961,15 +955,6 @@ namespace Sapphire::Entity
     void writeItemDb( ItemPtr pItem ) const;
 
     void deleteItemDb( ItemPtr pItem ) const;
-
-    /*! return the crystal amount of currency of type */
-    uint32_t getCrystal( Common::CrystalType type );
-
-    /*! add amount to the crystal of type */
-    void addCrystal( Common::CrystalType type, uint32_t amount, bool sendLootMessage = false );
-
-    /*! remove amount from the crystals of type */
-    void removeCrystal( Common::CrystalType type, uint32_t amount );
 
     bool isObtainable( uint32_t catalogId, uint8_t quantity );
 
@@ -983,6 +968,29 @@ namespace Sapphire::Entity
     Common::ActiveLand getActiveLand() const;
 
     Sapphire::ItemPtr dropInventoryItem( Common::InventoryType type, uint16_t slotId, bool silent = false );
+
+    // CurrencyCrystal Handling
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    void initCurrencyCrystal();
+
+    bool loadCurrency();
+
+    bool loadCrystal();
+
+    bool loadExtraCurrency();
+
+    /*! add amount to the currency/crystal of type */
+    void addCurrencyCrystal(Common::CurrencyCrystalType type, uint32_t amount, bool sendLootMessage = false);
+
+    /*! remove amount from the currency/crystal of type */
+    void removeCurrencyCrystal(Common::CurrencyCrystalType type, uint32_t amount);
+
+    /*! return the current amount of currency/crystal of type */
+    uint32_t getCurrencyCrystal(Common::CurrencyCrystalType type);
+
+    void updateCurrencyCrystalDb(std::string& tableName, CurrencyCrystalPtr pItem) const;
+
+    void writeCurrencyCrystalDb(std::string& tableName) const;
 
     // Job UI
     //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1033,9 +1041,11 @@ namespace Sapphire::Entity
     World::Action::ActionPtr m_pQueuedAction;
 
   private:
-    using InventoryMap = std::map< uint16_t, Sapphire::ItemContainerPtr >;
+    using InventoryMap = std::map< Common::InventoryType, Sapphire::ItemContainerPtr >;
+    using CurrencyCrystalMap = std::map< Common::InventoryType, Sapphire::CurrencyCrystalContainerPtr >;
 
     InventoryMap m_storageMap;
+    CurrencyCrystalMap m_currencyCrystalMap;
 
     Common::FFXIVARR_POSITION3 m_prevPos;
     uint32_t m_prevTerritoryTypeId;
@@ -1067,20 +1077,20 @@ namespace Sapphire::Entity
     uint16_t m_activeTitle;
     uint8_t m_titleList[48];
     uint8_t m_howTo[34];
-    uint8_t m_minions[40];
-    uint8_t m_mountGuide[27];
+    uint8_t m_minions[53];
+    uint8_t m_mountGuide[29];
     uint8_t m_homePoint;
     uint8_t m_startTown;
     uint16_t m_townWarpFstFlags;
-    uint8_t m_questCompleteFlags[487];
-    uint8_t m_discovery[445];
+    uint8_t m_questCompleteFlags[512];
+    uint8_t m_discovery[440];
     uint32_t m_playTime;
 
-    uint16_t m_classArray[28];
+    uint16_t m_classArray[30];
     uint32_t m_expArray[28];
     uint8_t m_aetheryte[21];
     uint8_t m_unlocks[64];
-    uint8_t m_orchestrion[40];
+    uint8_t m_orchestrion[60];
 
     uint8_t m_openingSequence;
 
@@ -1141,10 +1151,10 @@ namespace Sapphire::Entity
 
     struct PlayerDyeingInfo
     {
-      uint32_t itemToDyeContainer;
-      uint32_t itemToDyeSlot;
-      uint32_t dyeBagContainer;
-      uint32_t dyeBagSlot;
+      Common::InventoryType itemToDyeContainer;
+      uint8_t itemToDyeSlot;
+      Common::InventoryType dyeBagContainer;
+      uint8_t dyeBagSlot;
     } m_dyeingInfo;
 
     Common::Util::SpawnIndexAllocator< uint8_t > m_objSpawnIndexAllocator;

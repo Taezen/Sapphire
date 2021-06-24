@@ -6,6 +6,8 @@
 #include <string>
 #include <cstring>
 
+#include <Common.h>
+
 namespace Sapphire::Api
 {
 
@@ -159,7 +161,7 @@ namespace Sapphire::Api
       m_gmInvis = invis;
     }
 
-    void createInvDbContainer( uint16_t slot ) const;
+    void createInvDbContainer( Common::InventoryType slot ) const;
 
     uint32_t m_modelEquip[10];
 

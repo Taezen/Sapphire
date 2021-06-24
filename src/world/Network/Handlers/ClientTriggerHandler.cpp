@@ -287,7 +287,7 @@ void Sapphire::Network::GameConnection::clientTriggerHandler( const Packets::FFX
       // param12 = item to dye slot
       // param2 = dye bag container
       // param4 = dye bag slot
-      player.setDyeingInfo( param11, param12, param2, param4 );
+      player.setDyeingInfo( static_cast< Common::InventoryType >( param11 ), param12, static_cast< Common::InventoryType >( param2 ), param4 );
       break;
     }
     case ClientTriggerType::DirectorInitFinish: // Director init finish
@@ -425,7 +425,7 @@ void Sapphire::Network::GameConnection::clientTriggerHandler( const Packets::FFX
 
       auto& housingMgr = Common::Service< HousingMgr >::ref();
 
-      uint16_t inventoryType = Common::InventoryType::HousingExteriorPlacedItems;
+      Common::InventoryType inventoryType = Common::InventoryType::HousingExteriorPlacedItems;
       if( param2 == 1 )
         inventoryType = Common::InventoryType::HousingExteriorStoreroom;
 
@@ -455,7 +455,7 @@ void Sapphire::Network::GameConnection::clientTriggerHandler( const Packets::FFX
       auto sendToStoreroom = ( param4 >> 16 ) != 0;
 
       //player, plot, containerId, slot, sendToStoreroom
-      housingMgr.reqRemoveHousingItem( player, static_cast< uint16_t >( param12 ), static_cast< uint16_t >( param2 ), static_cast< uint8_t >( slot ), sendToStoreroom );
+      housingMgr.reqRemoveHousingItem( player, static_cast< uint16_t >( param12 ), static_cast< Common::InventoryType >( param2 ), static_cast< uint8_t >( slot ), sendToStoreroom );
 
       break;
     }

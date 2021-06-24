@@ -14,12 +14,12 @@ namespace Sapphire
   {
 
   public:
-    ItemContainer( uint16_t storageId, uint8_t maxSize, const std::string& tableName, bool isMultiStorage,
+    ItemContainer( Common::InventoryType storageId, uint8_t maxSize, const std::string& tableName, bool isMultiStorage,
                    bool isPersistentStorage = true );
 
     ~ItemContainer();
 
-    uint16_t getId() const;
+    Common::InventoryType getId() const;
 
     uint8_t getEntryCount() const;
 
@@ -44,7 +44,7 @@ namespace Sapphire
     bool isPersistentStorage() const;
 
   private:
-    uint16_t m_id;
+    Common::InventoryType m_id;
     uint8_t m_size;
     std::string m_tableName;
     bool m_bMultiStorage;

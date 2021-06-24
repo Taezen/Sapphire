@@ -28,13 +28,13 @@ bool Sapphire::World::Manager::ShopMgr::purchaseGilShopItem( Entity::Player& pla
 
   auto price = item->priceMid * quantity;
 
-  if( player.getCurrency( Common::CurrencyType::Gil ) < price )
+  if( player.getCurrencyCrystal( Common::CurrencyCrystalType::Gil ) < price )
     return false;
 
   if( !player.addItem( gilShopItem->item, quantity ) )
     return false;
 
-  player.removeCurrency( Common::CurrencyType::Gil, price );
+  player.removeCurrencyCrystal( Common::CurrencyCrystalType::Gil, price );
 
   auto packet = makeZonePacket< FFXIVIpcShopMessage >( player.getId() );
   packet->data().shopId = shopId;
@@ -50,7 +50,7 @@ bool Sapphire::World::Manager::ShopMgr::purchaseGilShopItem( Entity::Player& pla
   return true;
 }
 
-bool Sapphire::World::Manager::ShopMgr::shopSellItem( Sapphire::Entity::Player& player, uint32_t shopId, uint16_t containerId, uint16_t slotId )
+bool Sapphire::World::Manager::ShopMgr::shopSellItem( Sapphire::Entity::Player& player, uint32_t shopId, Common::InventoryType containerId, uint16_t slotId )
 {
   auto item = player.getItemAt( containerId, slotId );
   if( item )
@@ -61,7 +61,7 @@ bool Sapphire::World::Manager::ShopMgr::shopSellItem( Sapphire::Entity::Player& 
     {
       auto value = itemData->priceLow * item->getStackSize();
       player.dropInventoryItem( static_cast< Common::InventoryType >( containerId ), slotId );
-      player.addCurrency( Common::CurrencyType::Gil, value );
+      player.addCurrencyCrystal( Common::CurrencyCrystalType::Gil, value );
       Entity::ShopBuyBackEntry entry =
       {
         item,
@@ -94,13 +94,13 @@ bool Sapphire::World::Manager::ShopMgr::shopBuyBack( Sapphire::Entity::Player& p
     auto& entry = buyBackList[ index ];
     auto originalStack = entry.item->getStackSize();
     auto price = entry.pricePerItem * originalStack;
-    if( player.getCurrency( Common::CurrencyType::Gil ) < price )
+    if( player.getCurrencyCrystal( Common::CurrencyCrystalType::Gil ) < price )
       return false;
 
     if( !player.addItem( entry.item ) )
       return false;
 
-    player.removeCurrency( Common::CurrencyType::Gil, price );
+    player.removeCurrencyCrystal( Common::CurrencyCrystalType::Gil, price );
 
     buyBackList.erase( buyBackList.begin() + index );
 

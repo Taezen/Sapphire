@@ -215,7 +215,7 @@ void Sapphire::Network::GameConnection::gm1Handler( const Packets::FFXIVARR_PACK
                          "\nSearchMessage: {7}"
                          "\nPlayTime: {8}",
                          targetPlayer->getName(),
-                         targetPlayer->getCurrency( CurrencyType::Gil ),
+                         targetPlayer->getCurrencyCrystal( CurrencyCrystalType::Gil ),
                          targetPlayer->getCurrentTerritory()->getName(),
                          targetPlayer->getZoneId(),
                          static_cast< uint8_t >( targetPlayer->getClass() ),
@@ -345,9 +345,9 @@ void Sapphire::Network::GameConnection::gm1Handler( const Packets::FFXIVARR_PACK
         player.sendUrgent( "Syntaxerror." );
         return;
       }
-      if( param1 <= 0x12 ) // crystal
+      if( param1 <= 0x13 ) // crystal
       {
-        targetPlayer->addCrystal( static_cast< Common::CrystalType >( param1 ), quantity, true );
+        targetPlayer->addCurrencyCrystal( static_cast< Common::CurrencyCrystalType >( param1 ), quantity, true );
       }
       else // item
       {
@@ -361,13 +361,13 @@ void Sapphire::Network::GameConnection::gm1Handler( const Packets::FFXIVARR_PACK
     }
     case GmCommand::Gil:
     {
-      targetPlayer->addCurrency( CurrencyType::Gil, param1, true );
+      targetPlayer->addCurrencyCrystal( CurrencyCrystalType::Gil, param1, true );
       player.sendNotice( "Added {0} Gil for {1}", param1, targetPlayer->getName() );
       break;
     }
     case GmCommand::Collect:
     {
-      uint32_t gil = targetPlayer->getCurrency( CurrencyType::Gil );
+      uint32_t gil = targetPlayer->getCurrencyCrystal( CurrencyCrystalType::Gil );
 
       if( gil < param1 )
       {
@@ -375,7 +375,7 @@ void Sapphire::Network::GameConnection::gm1Handler( const Packets::FFXIVARR_PACK
       }
       else
       {
-        targetPlayer->removeCurrency( CurrencyType::Gil, param1 );
+        targetPlayer->removeCurrencyCrystal( CurrencyCrystalType::Gil, param1 );
         player.sendNotice( "Removed {0} Gil from {1} ({2} before)", param1, targetPlayer->getName(), gil );
       }
       break;

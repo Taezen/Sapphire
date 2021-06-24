@@ -101,6 +101,7 @@ struct FFXIVIpcZoneLineHandler :
   FFXIVIpcBasePacket< ZoneLineHandler >
 {
   /* 0000 */ uint32_t zoneLineId;
+  /* 0004 */ uint32_t unknown[5];
 };
 
 struct FFXIVIpcDiscoveryHandler :
@@ -236,11 +237,11 @@ struct FFXIVIpcInventoryModifyHandler :
   /* 0000 */ uint32_t seq;
   /* 0004 */ Common::InventoryOperation action;
   /* 0006 */ uint8_t pad_0006[6];
-  /* 000C */ uint16_t fromContainer;
+  /* 000C */ Common::InventoryType fromContainer;
   /* 000E */ uint8_t pad_000E[2];
   /* 0010 */ uint8_t fromSlot;
   /* 0011 */ uint8_t pad_0011[15];
-  /* 0020 */ uint16_t toContainer;
+  /* 0020 */ Common::InventoryType toContainer;
   /* 0022 */ uint8_t pad_0022[2];
   /* 0024 */ uint8_t toSlot;
   /* 0025 */ uint8_t pad_0025[3];
@@ -298,7 +299,7 @@ struct FFXIVIpcReqPlaceHousingItem :
   /* 0000 */ uint16_t landId; // 0 when plot 0 or inside an estate
   /* 0002 */ uint16_t unknown1;
   /* 0004 */ uint32_t unknown2;
-  /* 0008 */ uint16_t sourceInvContainerId;
+  /* 0008 */ Common::InventoryType sourceInvContainerId;
   /* 000A */ uint16_t sourceInvSlotId;
 
   /* 000C */ Common::FFXIVARR_POSITION3 position;
@@ -436,6 +437,16 @@ struct FFXIVIpcHousingEditExterior :
   uint16_t container[9];
   uint16_t slot[9];
   uint16_t padding;
+};
+
+struct FFXIVIpcReqGearSetChange :
+  FFXIVIpcBasePacket< InventoryEquipRecommendedItems >
+{
+  uint8_t gearSetId;
+  uint8_t padding0[3];
+  Common::InventoryType inventoryType[14];
+  uint16_t slotId[14];
+  uint32_t padding1;
 };
 
 }

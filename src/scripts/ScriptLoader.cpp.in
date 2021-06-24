@@ -1,4 +1,6 @@
 #include <Script/NativeScriptApi.h>
+#include <Service.h>
+#include <Exd\ExdDataGenerated.h>
 
 @ScriptIncludes@
 
@@ -8,7 +10,9 @@ const Sapphire::ScriptAPI::ScriptObject* ptrs[] =
    nullptr
 };
 
-extern "C" EXPORT const Sapphire::ScriptAPI::ScriptObject** getScripts()
+extern "C" EXPORT const Sapphire::ScriptAPI::ScriptObject** getScripts( std::shared_ptr< Sapphire::Data::ExdDataGenerated > pExdData )
 {
+   Sapphire::Common::Service< Sapphire::Data::ExdDataGenerated >::set( pExdData );
+
    return ptrs;
 }

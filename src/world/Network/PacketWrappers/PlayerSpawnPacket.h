@@ -46,7 +46,7 @@ namespace Sapphire::Network::Packets::Server
 
       memcpy( m_data.look, player.getLookArray(), sizeof( m_data.look ) );
 
-      auto item = player.getItemAt( Common::GearSet0, Common::GearSetSlot::MainHand );
+      auto item = player.getItemAt( Common::InventoryType::GearSet0, Common::GearSetSlot::MainHand );
       if( item )
         m_data.mainWeaponModel = player.getModelMainWeapon();
       m_data.secWeaponModel = player.getModelSubWeapon();

@@ -85,7 +85,7 @@ enum class BaseParam : uint8_t
   Morale = 48,
   Enmity = 49,
   EnmityReduction = 50,
-  CarefulDesynthesis = 51,
+  DesynthesisSkillGain = 51,
   EXPBonus = 52,
   Regen = 53,
   Refresh = 54,
@@ -129,6 +129,21 @@ enum class BeastReputationRank : uint8_t
 //BeastTribe.exd
 enum class BeastTribe : uint8_t
 {
+  None = 0,
+  Amaljaa = 1,
+  Sylphs = 2,
+  Kobolds = 3,
+  Sahagin = 4,
+  Ixal = 5,
+  VanuVanu = 6,
+  Vath = 7,
+  Moogles = 8,
+  Kojin = 9,
+  Ananta = 10,
+  Namazu = 11,
+  Pixies = 12,
+  Qitari = 13,
+  Dwarves = 14,
 };
 
 ///////////////////////////////////////////////////////////
@@ -204,6 +219,7 @@ enum class ContentType : uint8_t
   WondrousTails = 24,
   CustomDeliveries = 25,
   Eureka = 26,
+  UltimateRaids = 28,
 };
 
 ///////////////////////////////////////////////////////////
@@ -391,7 +407,7 @@ enum class ItemSearchCategory : uint8_t
   ConjurersArms = 15,
   ArcanistsArms = 16,
   Shields = 17,
-  DancersArms = 18,
+  ThrowingWeapons = 18,
   CarpentersTools = 19,
   BlacksmithsTools = 20,
   ArmorersTools = 21,
@@ -460,24 +476,24 @@ enum class ItemSearchCategory : uint8_t
   RedMagesArms = 84,
   ScholarsArms = 85,
   GunbreakersArms = 86,
-  ThrowingWeapons = 87,
+  DancersArms = 87,
 };
 
 ///////////////////////////////////////////////////////////
 //OnlineStatus.exd
 enum class OnlineStatus : uint8_t
 {
-  Producer = 1,
+  GameQA = 1,
   GameMaster = 2,
   GameMaster1 = 3,
-  GameMaster2 = 4,
+  EventParticipant = 4,
   Disconnected = 5,
   WaitingforFriendListApproval = 6,
   WaitingforLinkshellApproval = 7,
   WaitingforFreeCompanyApproval = 8,
   NotFound = 9,
   Offline = 10,
-  Mentor = 11,
+  BattleMentor = 11,
   Busy = 12,
   PvP = 13,
   PlayingTripleTriad = 14,
@@ -493,7 +509,7 @@ enum class OnlineStatus : uint8_t
   SwordforHire = 24,
   WaitingforDutyFinder = 25,
   RecruitingPartyMembers = 26,
-  Mentor1 = 27,
+  Mentor = 27,
   PvEMentor = 28,
   TradeMentor = 29,
   PvPMentor = 30,
@@ -672,14 +688,14 @@ enum class Weather : uint8_t
   Moonlight1 = 98,
   Moonlight2 = 99,
   Moonlight3 = 100,
-  FairSkies10 = 101,
+  RedMoon = 101,
   Scarlet = 102,
   Scarlet1 = 103,
   Scarlet2 = 104,
-  FairSkies11 = 105,
-  FairSkies12 = 106,
-  FairSkies13 = 107,
-  FairSkies14 = 108,
+  FairSkies10 = 105,
+  FairSkies11 = 106,
+  FairSkies12 = 107,
+  FairSkies13 = 108,
   Flames = 109,
   Tsunamis = 110,
   Cyclones = 111,
@@ -701,7 +717,23 @@ enum class Weather : uint8_t
   Termination2 = 127,
   Termination3 = 128,
   EverlastingLight1 = 129,
+  Eruptions1 = 130,
   Termination4 = 131,
+  FairSkies14 = 132,
+  UmbralFlare = 133,
+  UmbralDuststorm = 134,
+  UmbralLevin = 135,
+  UmbralTempest = 136,
+  Starshower = 137,
+  Delirium = 138,
+  Clouds2 = 139,
+  Clouds3 = 140,
+  Irradiance1 = 141,
+  Irradiance2 = 142,
+  StormClouds1 = 143,
+  Firestorm = 144,
+  SpectralCurrent = 145,
+  Climactic = 147,
 };
 
 ///////////////////////////////////////////////////////////
@@ -728,6 +760,10 @@ enum class HousingAppeal : uint8_t
   Bathhouse = 18,
   Garden = 19,
   FarEastern = 20,
+  VisitorsWelcome = 21,
+  Bakery = 22,
+  UnderRenovation = 23,
+  ConcertHall = 24,
 };
 
 }

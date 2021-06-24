@@ -46,7 +46,7 @@ namespace Sapphire::World::Manager
      * @param containerId The container the item is in
      * @param slotId The slot the item is in
      */
-    void removeItemFromHousingContainer( Common::LandIdent ident, uint16_t containerId, uint16_t slotId );
+    void removeItemFromHousingContainer( Common::LandIdent ident, Common::InventoryType containerId, uint16_t slotId );
 
     /*!
      * @brief Update an item in the db
@@ -86,7 +86,7 @@ namespace Sapphire::World::Manager
      * @param itemId
      */
     void saveHousingContainerItem( uint64_t ident,
-                                   uint16_t containerId, uint16_t slotId,
+                                   Common::InventoryType containerId, uint16_t slotId,
                                    uint64_t itemId );
   };
 

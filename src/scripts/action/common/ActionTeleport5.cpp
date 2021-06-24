@@ -23,14 +23,14 @@ public:
 
     auto teleportQuery = player->getTeleportQuery();
 
-    if( player->getCurrency( Common::CurrencyType::Gil ) < teleportQuery.cost ||
+    if( player->getCurrencyCrystal( Common::CurrencyCrystalType::Gil ) < teleportQuery.cost ||
         teleportQuery.targetAetheryte == 0 )
     {
       action.interrupt();
       return;
     }
 
-    player->removeCurrency( Common::CurrencyType::Gil, teleportQuery.cost );
+    player->removeCurrencyCrystal( Common::CurrencyCrystalType::Gil, teleportQuery.cost );
 
     player->setZoningType( Common::ZoneingType::Teleport );
     player->teleport( teleportQuery.targetAetheryte );

@@ -162,7 +162,7 @@ void Sapphire::World::Territory::Housing::HousingInteriorTerritory::updateHousin
 
 void Sapphire::World::Territory::Housing::HousingInteriorTerritory::spawnHousingObject( uint8_t containerIdx,
                                                                                         uint16_t slot,
-                                                                                        uint16_t containerType,
+                                                                                        InventoryType containerType,
                                                                                         Inventory::HousingItemPtr item )
 {
   auto& housingMgr = Common::Service< Manager::HousingMgr >::ref();

@@ -85,7 +85,7 @@ Sapphire::Entity::Player::Player() :
 {
   m_id = 0;
   m_currentStance = Stance::Passive;
-  m_onlineStatus = 0;
+  m_onlineStatus = 1 << static_cast< uint8_t >( OnlineStatus::Online ); //This is the standard status on retail
   m_queuedZoneing = nullptr;
   m_status = ActorStatus::Idle;
   m_invincibilityType = InvincibilityType::InvincibilityNone;
@@ -171,8 +171,8 @@ void Sapphire::Entity::Player::setGmInvis( bool invis )
 bool Sapphire::Entity::Player::isActingAsGm() const
 {
   auto status = getOnlineStatus();
-  return status == OnlineStatus::GameMaster || status == OnlineStatus::GameMaster1 ||
-         status == OnlineStatus::GameMaster2;
+  return status == OnlineStatus::GameQA || status == OnlineStatus::GameMaster ||
+         status == OnlineStatus::GameMaster1;
 }
 
 uint8_t Sapphire::Entity::Player::getMode() const
@@ -1137,7 +1137,7 @@ void Sapphire::Entity::Player::update( uint64_t tickCount )
   {
     if( m_targetId && m_currentStance == Common::Stance::Active && isAutoattackOn() )
     {
-      auto mainWeap = getItemAt( Common::GearSet0, Common::GearSetSlot::MainHand );
+      auto mainWeap = getItemAt( Common::InventoryType::GearSet0, Common::GearSetSlot::MainHand );
 
       // @TODO i dislike this, iterating over all in range actors when you already know the id of the actor you need...
       for( auto actor : m_inRangeActor )
@@ -1609,7 +1609,7 @@ uint32_t Sapphire::Entity::Player::getPersistentEmote() const
 void Sapphire::Entity::Player::autoAttack( CharaPtr pTarget )
 {
 
-  auto mainWeap = getItemAt( Common::GearSet0, Common::GearSetSlot::MainHand );
+  auto mainWeap = getItemAt( Common::InventoryType::GearSet0, Common::GearSetSlot::MainHand );
 
   pTarget->onActionHostile( getAsChara() );
   //uint64_t tick = Util::getTimeMs();
@@ -1740,33 +1740,40 @@ void Sapphire::Entity::Player::sendZonePackets()
   initPacket->data().charId = getId();
   queuePacket( initPacket );
 
+  queuePacket( makeActorControlSelf( getId(), GearSetList, 45 ) ); //TODO: Don't hardcode this
+
   sendInventory();
 
-  if( isLogin() )
-  {
-    queuePacket( makeActorControlSelf( getId(), SetCharaGearParamUI, m_equipDisplayFlags, 1 ) );
-  }
+  queuePacket( makeActorControlSelf( getId(), SetCharaGearParamUI, m_equipDisplayFlags ) ); //It's send on login and zone changes on retail
+
+  sendStateFlags(); //TODO: Don't send this, if it's new game
+
+  auto statusPacket = makeZonePacket< FFXIVIpcSetOnlineStatus >( getId() );
+  statusPacket->data().onlineStatusFlags = getOnlineStatusMask();
+  queuePacket( statusPacket );
 
   // set flags, will be reset automatically by zoning ( only on client side though )
   //setStateFlag( PlayerStateFlag::BetweenAreas );
   //setStateFlag( PlayerStateFlag::BetweenAreas1 );
 
-  if( isActionLearned( static_cast< uint8_t >( Common::UnlockEntry::HuntingLog ) ) )
-    sendHuntingLog();
+  if ( isLogin() )
+  {
+    sendHuntingLog(); //It's already sent when you log in for the first time, but not on zone change
+  }
 
   sendStats();
 
   // only initialize the UI if the player in fact just logged in.
   if( isLogin() )
   {
-    auto contentFinderList = makeZonePacket< FFXIVIpcCFAvailableContents >( getId() );
+    /*auto contentFinderList = makeZonePacket< FFXIVIpcCFAvailableContents >(getId());
 
     for( auto i = 0; i < sizeof( contentFinderList->data().contents ); i++ )
     {
       // unlock all contents for now
       contentFinderList->data().contents[ i ] = 0xFF;
     }
-    queuePacket( contentFinderList );
+    queuePacket( contentFinderList );*/
 
     queuePacket( std::make_shared< PlayerSetupPacket >( *this ) );
 
@@ -1814,11 +1821,11 @@ void Sapphire::Entity::Player::sendZonePackets()
 
   if( isLogin() )
   {
-    auto unk322 = makeZonePacket< FFXIVARR_IPC_UNK322 >( getId() );
-    queuePacket( unk322 );
-
     auto unk320 = makeZonePacket< FFXIVARR_IPC_UNK320 >( getId() );
     queuePacket( unk320 );
+
+    auto unk322 = makeZonePacket< FFXIVARR_IPC_UNK322 >( getId() );
+    queuePacket( unk322 );
   }
 
 //  if( getLastPing() == 0 )
@@ -1926,7 +1933,7 @@ void Sapphire::Entity::Player::teleportQuery( uint16_t aetheryteId )
     // cap at 999 gil
     cost = std::min< uint16_t >( 999, cost );
 
-    bool insufficientGil = getCurrency( Common::CurrencyType::Gil ) < cost;
+    bool insufficientGil = getCurrencyCrystal( Common::CurrencyCrystalType::Gil ) < cost;
     // TODO: figure out what param1 really does
     queuePacket( makeActorControlSelf( getId(), TeleportStart, insufficientGil ? 2 : 0, aetheryteId ) );
 
@@ -1970,7 +1977,7 @@ uint8_t Sapphire::Entity::Player::getNextObjSpawnIndexForActorId( uint32_t actor
   return index;
 }
 
-void Sapphire::Entity::Player::setDyeingInfo( uint32_t itemToDyeContainer, uint32_t itemToDyeSlot, uint32_t dyeBagContainer, uint32_t dyeBagSlot )
+void Sapphire::Entity::Player::setDyeingInfo( InventoryType itemToDyeContainer, uint8_t itemToDyeSlot, InventoryType dyeBagContainer, uint8_t dyeBagSlot )
 {
   m_dyeingInfo.itemToDyeContainer = itemToDyeContainer;
   m_dyeingInfo.itemToDyeSlot = itemToDyeSlot;
@@ -1980,10 +1987,10 @@ void Sapphire::Entity::Player::setDyeingInfo( uint32_t itemToDyeContainer, uint3
 
 void Sapphire::Entity::Player::dyeItemFromDyeingInfo()
 {
-  uint32_t itemToDyeContainer = m_dyeingInfo.itemToDyeContainer;
-  uint32_t itemToDyeSlot = m_dyeingInfo.itemToDyeSlot;
-  uint32_t dyeBagContainer = m_dyeingInfo.dyeBagContainer;
-  uint32_t dyeBagSlot = m_dyeingInfo.dyeBagSlot;
+  InventoryType itemToDyeContainer = m_dyeingInfo.itemToDyeContainer;
+  uint8_t itemToDyeSlot = m_dyeingInfo.itemToDyeSlot;
+  InventoryType dyeBagContainer = m_dyeingInfo.dyeBagContainer;
+  uint8_t dyeBagSlot = m_dyeingInfo.dyeBagSlot;
 
   sendStateFlags(); // Retail sends all 0s to unlock player after a dye? Possibly not setting a flag when the action is started in the backend..?
   auto itemToDye = getItemAt( itemToDyeContainer, itemToDyeSlot );

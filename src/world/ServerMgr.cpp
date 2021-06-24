@@ -37,6 +37,7 @@
 #include "Manager/InventoryMgr.h"
 #include "Manager/EventMgr.h"
 #include "Manager/ItemMgr.h"
+#include "Manager/CurrencyCrystalMgr.h"
 #include "Manager/MarketMgr.h"
 #include "Manager/RNGMgr.h"
 #include "Manager/NaviMgr.h"
@@ -221,6 +222,7 @@ void Sapphire::World::ServerMgr::run( int32_t argc, char* argv[] )
   auto pInventoryMgr = std::make_shared< Manager::InventoryMgr >();
   auto pEventMgr = std::make_shared< Manager::EventMgr >();
   auto pItemMgr = std::make_shared< Manager::ItemMgr >();
+  auto pCurrencyCrystalMgr = std::make_shared< Manager::CurrencyCrystalMgr >();
   auto pRNGMgr = std::make_shared< Manager::RNGMgr >();
 
   Common::Service< DebugCommandMgr >::set( pDebugCom );
@@ -229,6 +231,7 @@ void Sapphire::World::ServerMgr::run( int32_t argc, char* argv[] )
   Common::Service< Manager::InventoryMgr >::set( pInventoryMgr );
   Common::Service< Manager::EventMgr >::set( pEventMgr );
   Common::Service< Manager::ItemMgr >::set( pItemMgr );
+  Common::Service< Manager::CurrencyCrystalMgr >::set( pCurrencyCrystalMgr );
   Common::Service< Manager::RNGMgr >::set( pRNGMgr );
 
   Logger::info( "World server running on {0}:{1}", m_ip, m_port );

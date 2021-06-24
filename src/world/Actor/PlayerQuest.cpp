@@ -1087,7 +1087,7 @@ bool Sapphire::Entity::Player::giveQuestRewards( uint32_t questId, uint32_t opti
   }
 
   if( gilReward > 0 )
-    addCurrency( CurrencyType::Gil, gilReward, true );
+    addCurrencyCrystal( CurrencyCrystalType::Gil, gilReward, true );
 
   return true;
 }

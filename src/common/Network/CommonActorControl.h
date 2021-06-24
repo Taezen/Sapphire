@@ -188,6 +188,15 @@ namespace Sapphire::Network::ActorControl
     RelicInfuseMsg = 0x179,
 
     /*!
+     * param1 = slotId (only centurio seals (maybe Sack of Nuts with slotId 0 too) and scrips)
+     * param2 = itemId
+     * param3 = maxQuantity
+     * param4 = quantity
+     * param5 = set to 1 if maxQuantity is 65000
+     */
+    ExtraCurrency = 0x017A, 
+
+    /*!
      * Sent as result of an aetherial reduction.
      * param1 = Reduced item ID + 500 000 (idk what this 500 000 is but it's always here no matter what)
      * param2 = First result item id (+ 1 000 000 if HQ)
@@ -256,6 +265,7 @@ namespace Sapphire::Network::ActorControl
 
     ExamineError = 0x2BF,
 
+    GearSetList = 0x320, // param1: amount of save slots
     GearSetEquipMsg = 0x321,
 
     SetBait = 0x325, // param1: bait ID
@@ -340,6 +350,19 @@ namespace Sapphire::Network::ActorControl
     SetDutyActionRemaining = 0x5EB,
 
     EurekaStep = 0x73A, // alters the progress of the player on Eureka (is used for all the eureka zones)
+
+    /*!
+     * param1 = ???
+     * param2 = collection id
+     *          1 - Portable Archive
+     *          2 - Field Record
+     *          3 - Yo-kai Medallium
+     * param3 = remove/add
+     *          0 - Removes it from collection
+     *          1 - Adds it to collection
+     * This doesn't report progress for it, only if it's visible or not
+     */
+    CollectionItem = 0x8CB
   };
 
   enum ClientTriggerType

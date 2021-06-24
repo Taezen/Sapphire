@@ -51,11 +51,11 @@ namespace Sapphire::Common
 
   enum InventoryOperation : uint16_t
   {
-    Discard = 0x0117,
-    Move = 0x0118,
-    Swap = 0x0119,
-    Split = 0x011A,
-    Merge = 0x011C,
+    Discard = 0x00C7,
+    Move = 0x00C8,
+    Swap = 0x00C9,
+    Split = 0x00CA,
+    Merge = 0x00CC
   };
 
   enum ClientLanguage : uint8_t
@@ -184,7 +184,7 @@ namespace Sapphire::Common
     BodyDisallowLegsFeet = 21,
   };
 
-  enum InventoryType : uint16_t
+  enum class InventoryType : uint16_t
   {
     Bag0 = 0,
     Bag1 = 1,
@@ -224,6 +224,8 @@ namespace Sapphire::Common
     // These are the ones you get when paying for premium companion app
     PremiumSaddleBag0 = 4100,
     PremiumSaddleBag1 = 4101,
+
+    Placeholder = 9999, //Used for empty slots in the ReqGearSetChange packet
 
     RetainerBag0 = 10000,
     RetainerBag1 = 10001,
@@ -274,6 +276,7 @@ namespace Sapphire::Common
     HousingExteriorPlacedItems = 25001,
     HousingExteriorStoreroom = 27000,
 
+    ExtraCurrency = 65535 //Just helper type
 
   };
 
@@ -301,46 +304,88 @@ namespace Sapphire::Common
   };
 
 
-  enum CurrencyType : uint8_t
+  enum class CurrencyCrystalType : uint16_t
   {
-    Gil = 0x01,
-    StormSeal = 0x02,
-    SerpentSeal = 0x03,
-    FlameSeal = 0x04,
-    TomestonePhilo = 0x05,
-    TomestoneMytho = 0x06,
-    WolfMark = 0x07,
-    TomestoneSold = 0x08,
-    AlliedSeal = 0x09,
-    TomestonePoet = 0x0A,
-    Mgp = 0x0B,
-    TomestoneLaw = 0x0C,
-    TomestoneEso = 0x0D,
-    TomestoneLore = 0x0E
-  };
+    Gil = 1,
 
-  enum CrystalType : uint8_t
-  {
-    FireShard = 0x01,
-    IceShard = 0x02,
-    WindShard = 0x03,
-    EarthShard = 0x04,
-    LightningShard = 0x05,
-    WaterShard = 0x06,
+    FireShard = 2,
+    IceShard = 3,
+    WindShard = 4,
+    EarthShard = 5,
+    LightningShard = 6,
+    WaterShard = 7,
 
-    FireCrystal = 0x07,
-    IceCrystal = 0x08,
-    WindCrystal = 0x09,
-    EarthCrystal = 0x0A,
-    LightningCrystal = 0x0B,
-    WaterCrystal = 0x0C,
+    FireCrystal = 8,
+    IceCrystal = 9,
+    WindCrystal = 10,
+    EarthCrystal = 11,
+    LightningCrystal = 12,
+    WaterCrystal = 13,
 
-    FireCluster = 0x0D,
-    IceCluster = 0x0E,
-    WindCluster = 0x0F,
-    EarthCluster = 0x10,
-    LightningCluster = 0x11,
-    WaterCluster = 0x12
+    FireCluster = 14,
+    IceCluster = 15,
+    WindCluster = 16,
+    EarthCluster = 17,
+    LightningCluster = 18,
+    WaterCluster = 19,
+
+    StormSeal = 20,
+    SerpentSeal = 21,
+    FlameSeal = 22,
+
+    WolfMark = 25,
+
+    AlliedSeal = 27,
+
+    TomestonePoet = 28,
+
+    Mgp = 29,
+
+    TomestonePhan = 39,
+    TomestoneAlle = 40,
+    TomestoneRev = 41,
+
+    CenturioSeal = 10307,
+
+    RedCraftersScrip = 10309,
+    RedGatherersScrip = 10311,
+    YellowCraftersScrip = 17833,
+    YellowGatherersScrip = 17834,
+
+    Venture = 21072,
+
+    IxaliOaknot = 21073,
+    VanuWhitebone = 21074,
+    SylphicGoldleaf = 21075,
+    SteelAmaljok = 21076,
+    RainbowtidePsashp = 21077,
+    TitanCobaltpiece = 21078,
+    BlackCopperGil = 21079,
+    CarvedKupoNut = 21080,
+    KojinSango = 21081,
+
+    AchievementCertificate = 21172,
+    UnknownItem0 = 21173,
+
+    AnantaDreamstaff = 21935,
+    NamazuKoban = 22525,
+
+    WhiteCraftersScrip = 25199,
+    WhiteGatherersScrip = 25200,
+
+    SackOfNuts = 26533,
+
+    BicolorGemstone = 26807,
+
+    SkybuildersScrip = 28063,
+
+    FaeFancy = 28186,
+    QitariCompliment = 28187,
+    HammeredFrogment = 28188,
+
+    FauxLeaf = 30341,
+
+    UnknownItem1 = 33138
   };
 
   enum struct ZoneingType : uint8_t
@@ -436,6 +481,7 @@ namespace Sapphire::Common
   enum MoveType : uint8_t
   {
     Running = 0x00,
+    Flying = 0x01,
     Walking = 0x02,
     Strafing = 0x04,
     Jumping = 0x10,
@@ -757,7 +803,9 @@ namespace Sapphire::Common
     BetweenAreas = 24,
     BoundByDuty = 28,
     Performing = 40,
+    IsFlying = 47,
     WatchingCutscene = 50, // this is actually just a dummy, this id is different
+    RegisteredInCF = 61,
 
 
   };

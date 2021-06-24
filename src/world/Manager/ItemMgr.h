@@ -18,10 +18,10 @@ namespace Sapphire::World::Manager
 
     /*! check if weapon category qualifies the weapon as onehanded */
     static bool isOneHandedWeapon( Common::ItemUICategory weaponCategory );
-    static bool isArmory( uint16_t containerId );
-    static bool isEquipment( uint16_t containerId );
-    static uint16_t getCharaEquipSlotCategoryToArmoryId( Common::EquipSlotCategory slot );
-    static Common::ContainerType getContainerType( uint32_t containerId );
+    static bool isArmory( Common::InventoryType containerId );
+    static bool isEquipment( Common::InventoryType containerId );
+    static Common::InventoryType getCharaEquipSlotCategoryToArmoryId( Common::EquipSlotCategory slot );
+    static Common::ContainerType getContainerType( Common::InventoryType containerId );
   };
 
 }

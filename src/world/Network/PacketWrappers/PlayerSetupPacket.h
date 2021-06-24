@@ -53,7 +53,7 @@ namespace Sapphire::Network::Packets::Server
       memcpy( m_data.aetheryte, player.getAetheryteArray(), sizeof( m_data.aetheryte ) );
 
       // Set the class levels and exp.
-      for( uint8_t i = 0; i < 25; i++ )
+      for ( uint8_t i = 0; i < 30; i++ )
       {
         m_data.levels[ i ] = player.getClassArray()[ i ];
         m_data.exp[ i ] = player.getExpArray()[ i ];
@@ -61,11 +61,14 @@ namespace Sapphire::Network::Packets::Server
 
       memcpy( m_data.orchestrionMask, player.getOrchestrionBitmask(), sizeof( m_data.orchestrionMask ) );
 
+      memset( m_data.minions, 0xFF, sizeof( m_data.minions ) );
+
       memcpy( m_data.mountGuideMask, player.getMountGuideBitmask(), sizeof( m_data.mountGuideMask ) );
 
       memcpy( m_data.unlockBitmask, player.getUnlockBitmask(), sizeof( m_data.unlockBitmask ) );
 
-      memcpy( m_data.discovery, player.getDiscoveryBitmask(), sizeof( m_data.discovery ) );
+      memcpy( m_data.discovery2, player.getDiscoveryBitmask(), sizeof( m_data.discovery2 ) );
+      memcpy( m_data.discovery4, player.getDiscoveryBitmask() + sizeof( m_data.discovery2 ), sizeof( m_data.discovery4 ) );
 
       memcpy( m_data.howto, player.getHowToArray(), sizeof( m_data.howto ) );
 
@@ -78,9 +81,11 @@ namespace Sapphire::Network::Packets::Server
   //      m_data.unknown70[4] = 1; // enable df
 
       // enable all raids/guildhests/dungeons
+      m_data.unlockedExtraCFContent = 3;
       memset( m_data.unlockedDungeons, 0xFF, sizeof( m_data.unlockedDungeons ) );
       memset( m_data.unlockedGuildhests, 0xFF, sizeof( m_data.unlockedGuildhests ) );
-      memset( m_data.unlockedPvp, 0xFF, sizeof( m_data.unlockedPvp ) );
+      m_data.unlockedPvp[0] = 1; //This is enough to enable all pvp content;
+      m_data.unlockedPvp2[0] = 1;
       memset( m_data.unlockedRaids, 0xFF, sizeof( m_data.unlockedRaids ) );
       memset( m_data.unlockedTrials, 0xFF, sizeof( m_data.unlockedTrials ) );
     };
