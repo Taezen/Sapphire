@@ -324,7 +324,7 @@ void Sapphire::World::ServerMgr::mainLoop()
       }
 
       // remove sessions that simply timed out
-      if( diff > 20 )
+      if( diff > m_config.network.disconnectTimeout )
       {
         Logger::info( "[{0}] Session time out", it->second->getId() );
 
