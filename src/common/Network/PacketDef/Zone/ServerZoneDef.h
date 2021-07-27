@@ -147,6 +147,31 @@ namespace Sapphire::Network::Packets::Server
     PlayerEntry entries[10];
   };
 
+  struct FFXIVIpcCWFriends : FFXIVIpcBasePacket< CWFriends >
+  {
+    uint64_t unknown;
+
+    struct CWPlayerEntry
+    {
+      uint64_t contentId;
+      uint16_t homeWorldId;
+      uint16_t currentWorldId;
+      uint16_t unknown;
+      char name[32];
+      uint16_t padding;
+    } cwPlayers[10];
+  };
+
+  struct FFXIVIpcRefreshCWFriend : FFXIVIpcBasePacket< RefreshCWFriend >
+  {
+    uint64_t contentId;
+    uint16_t homeWorldId;
+    uint16_t currentWorldId;
+    uint16_t unknown;
+    char name[32];
+    uint16_t padding;
+  };
+
   struct FFXIVIpcExamineSearchInfo : FFXIVIpcBasePacket< ExamineSearchInfo >
   {
     uint32_t unknown;
@@ -256,9 +281,8 @@ namespace Sapphire::Network::Packets::Server
     uint32_t category;
     uint32_t logMessage;
     uint8_t field_24;
-    uint8_t field_25;
-    uint8_t field_26[32];
-    uint32_t field_58;
+    char name[32];
+    uint8_t padding[7];
   };
 
   struct FFXIVIpcLinkshellList : FFXIVIpcBasePacket< LinkshellList >
@@ -272,7 +296,7 @@ namespace Sapphire::Network::Packets::Server
       uint16_t padding;
       char lsName[20];
       uint8_t unk[16];
-    } entry[8];
+    } LsEntries[8];
   };
 
   struct FFXIVIpcCWLinkshellList : FFXIVIpcBasePacket< CWLinkshellList >
@@ -284,7 +308,7 @@ namespace Sapphire::Network::Packets::Server
       uint8_t rank;
       char cwlsName[20];
       uint8_t unk[19];
-    } entry[8];
+    } CwlsEntries[8];
   };
 
   struct FFXIVIpcFellowshipList : FFXIVIpcBasePacket< FellowshipList >
@@ -297,7 +321,26 @@ namespace Sapphire::Network::Packets::Server
       uint8_t hasNewMessage; //if set to 1 or higher it shows a small fellowship notfication popup
       char fsName[60];
       uint8_t padding[6];
-    } entry[10];
+    } FsEntries[10];
+  };
+
+  struct FFXIVIpcCWLinkshellMemberList : FFXIVIpcBasePacket< CWLinkshellMemberList >
+  {
+    uint64_t cwlsId;
+    uint32_t sequence;
+    uint16_t nextStartIndex; //zero when no further entries exist
+    uint16_t startIndex;
+
+    struct CwlsMemberEntry
+    {
+      uint64_t contentId;
+      uint32_t cwlsEntryTimestamp;
+      uint16_t homeWorldId;
+      uint16_t currentWorldId;
+      uint8_t unknown[6];
+      char name[32];
+      uint16_t padding;
+    } CwlsMembersEntries[10];
   };
 
   /**
@@ -755,7 +798,7 @@ namespace Sapphire::Network::Packets::Server
     uint16_t unk; // == 0
     uint16_t modelChara;
     uint16_t rotation;
-    uint16_t unk2;
+    uint16_t currentMount;
     uint16_t activeMinion;
     uint8_t spawnIndex;
     uint8_t state;
@@ -769,15 +812,11 @@ namespace Sapphire::Network::Packets::Server
     uint8_t classJob;
     uint8_t u26d;
     uint16_t u27a;
-    uint8_t currentMount;
     uint8_t mountHead;
     uint8_t mountBody;
     uint8_t mountFeet;
     uint8_t mountColor;
     uint8_t scale;
-
-    uint16_t elementalLevel; // one of these two field changed to 16bit
-    //uint32_t element;
     uint8_t elementData[6];
 
     Common::StatusEffect effect[30];
@@ -786,7 +825,7 @@ namespace Sapphire::Network::Packets::Server
     char name[32];
     uint8_t look[26];
     char fcTag[6];
-    uint64_t unk30;
+    uint32_t unk30[2];
   };
 
   /**
@@ -829,9 +868,10 @@ namespace Sapphire::Network::Packets::Server
     uint32_t displayFlags;
     uint16_t fateID;
     uint16_t mPCurr;
-    uint16_t unknown1; // 0
-    uint16_t unknown2; // 0 or pretty big numbers > 30000
+    uint16_t unknown1;
+    uint16_t unknown2;
     uint16_t modelChara;
+    uint16_t currentMount;
     uint16_t rotation;
     uint16_t activeMinion;
     uint8_t spawnIndex;
@@ -840,21 +880,19 @@ namespace Sapphire::Network::Packets::Server
     uint8_t modelType;
     uint8_t subtype;
     uint8_t voice;
-    uint16_t u25c[2];
+    uint16_t u25c;
     uint8_t enemyType;
     uint8_t level;
     uint8_t classJob;
     uint8_t u26d;
     uint16_t u27a;
-    uint32_t u28; //unsure where the additional bytes are
-    uint8_t currentMount;
     uint8_t mountHead;
     uint8_t mountBody;
     uint8_t mountFeet;
     uint8_t mountColor;
     uint8_t scale;
-    uint16_t elementalLevel; // Eureka
-    uint16_t element; // Eureka
+    uint8_t elemental[6]; // Eureka
+    uint8_t unknown5_5[3];
     Common::StatusEffect effect[30];
     Common::FFXIVARR_POSITION3 pos;
     uint32_t models[10];
@@ -936,7 +974,7 @@ namespace Sapphire::Network::Packets::Server
     uint16_t unknown_3;
   };
 
-  struct FFXIVIpcBossHateList : FFXIVIpcBasePacket< BossHateList >
+  struct FFXIVIpcBossHateList : FFXIVIpcBasePacket< HateListTarget >
   {
     uint8_t numEntries;
     uint8_t padding0[3];
@@ -1032,6 +1070,16 @@ namespace Sapphire::Network::Packets::Server
     uint8_t padding0;
     uint8_t cfPreferredRole[10];
     uint8_t padding1[5];
+  };
+
+  struct FFXIVIpcFateSetup : FFXIVIpcBasePacket< FateSetup >
+  {
+    uint16_t fateId;
+    uint16_t padding0[3];
+    uint32_t startTimestamp;
+    uint32_t padding1;
+    int32_t fateLength; //fate length in seconds
+    uint32_t padding2;
   };
 
 
@@ -1323,7 +1371,7 @@ namespace Sapphire::Network::Packets::Server
   };
 
 
-  struct FFXIVIpcPlayerStatusEffectList : FFXIVIpcBasePacket< PlayerStatusEffectList >
+  struct FFXIVIpcPlayerStatusEffectList : FFXIVIpcBasePacket< PersistantEffect >
   {
     Common::StatusEffect effect[30];
   };
@@ -2301,10 +2349,28 @@ namespace Sapphire::Network::Packets::Server
 
     char otherName[32];
   };
+
+  struct FFXIVIpcRetainerSaleHistory : FFXIVIpcBasePacket < RetainerSaleHistory >
+  {
+    uint64_t retainerId;
+
+    struct SaleEntry
+    {
+      uint32_t itemId;
+      uint32_t salePrice;
+      uint32_t saleTimestamp;
+      uint32_t itemCount;
+      uint8_t isHq; // 1 if item is hq, otherwise 0
+      uint8_t unknown[2];
+      char buyerName[32];
+      uint8_t padding;
+    } saleEntries[20];
+  };
   
   struct FFXIVIpcRetainerInformation : FFXIVIpcBasePacket< RetainerInformation >
   {
-    uint8_t unknown0[8];
+    uint32_t sequence;
+    uint8_t unknown0[4];
     uint64_t retainerId;
     uint8_t hireOrder;
     uint8_t itemCount;
@@ -2319,6 +2385,29 @@ namespace Sapphire::Network::Packets::Server
     uint32_t retainerTaskComplete;
     uint8_t unknown14;
     char retainerName[20];
+    uint8_t padding[19];
+  };
+
+  struct FFXIVIpcRetainerShortInfo : FFXIVIpcBasePacket< RetainerShortInfo >
+  {
+    uint64_t retainerId;
+    uint32_t unknown0[3];
+    uint8_t unknown1;
+    char name[20];
+    uint8_t padding[16];
+  };
+
+  struct FFXIVIpcRetainerList : FFXIVIpcBasePacket < RetainerList >
+  {
+    struct RetainerEntry
+    {
+      uint64_t retainerId;
+      uint32_t unknownTimestamp;
+      uint8_t cityId;
+      uint8_t unknown[2];
+      char name[20];
+      uint8_t padding[13];
+    } retainers[10];
   };
 
   struct FFXIVIpcCharaVisualEffect : FFXIVIpcBasePacket< CharaVisualEffect >

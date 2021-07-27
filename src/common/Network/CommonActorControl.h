@@ -362,7 +362,12 @@ namespace Sapphire::Network::ActorControl
      *          1 - Adds it to collection
      * This doesn't report progress for it, only if it's visible or not
      */
-    CollectionItem = 0x8CB
+    CollectionItem = 0x8CB,
+
+    FateState = 0x931, //param1 = fate id, param2 = state? seems to be always 2 to be visible
+    InitFate = 0x935, //param1 = fate id
+    FateUpdate = 0x93E, //param1 = fate id, param2 = fate progress in percent
+    FateUnknown = 0x944 //param1 = fate id
   };
 
   enum ClientTriggerType
@@ -392,6 +397,9 @@ namespace Sapphire::Network::ActorControl
     ClearFieldMarkers = 0x13A,
     CameraMode = 0x13B, // param12, 1 = camera mode enable, 0 = disable
     CharaNameReq = 0x13D, // requests character name by content id
+
+    UpdateRetainerItemSalePrice = 0x190, // param11 = item slot id, param12 = sale price
+
     HuntingLogDetails = 0x194,
 
     Timers = 0x1AB,
@@ -427,6 +435,8 @@ namespace Sapphire::Network::ActorControl
     DirectorInitFinish = 0x321,
 
     DirectorSync = 0x328, // unsure what exactly triggers it, starts director when returning to instance though
+
+    ReqFateInfo = 0x32A, //param1 = fate id
 
     EnterTerritoryEventFinished = 0x330,
     RequestInstanceLeave = 0x333, // df menu button

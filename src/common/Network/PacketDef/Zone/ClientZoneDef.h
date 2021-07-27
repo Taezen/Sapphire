@@ -342,6 +342,12 @@ struct FFXIVIpcMarketBoardRequestItemListingInfo :
   /* 0000 */ uint32_t requestId;
 };
 
+struct FFXIVIpcReqRetainerSaleHistory :
+  FFXIVIpcBasePacket< ReqRetainerSaleHistory >
+{
+  uint64_t retainerId;
+};
+
 struct FFXIVIpcFreeCompanyUpdateShortMessageHandler :
   FFXIVIpcBasePacket< FreeCompanyUpdateShortMessageHandler >
 {
@@ -383,6 +389,26 @@ struct FFXIVIpcSocialResponseHandler :
   uint8_t socialType;
   uint8_t response;
   uint32_t unknown;
+};
+
+struct FFXIVIpcReqCWFriendsHandler :
+  FFXIVIpcBasePacket< ReqCWFriendsHandler >
+{
+  uint64_t contentIds[10];
+};
+
+struct FFXIVIpcReqRefreshCWFriendHandler :
+  FFXIVIpcBasePacket< ReqRefreshCWFriendHandler >
+{
+  uint64_t contentId;
+};
+
+struct FFXIVIpcCWLinkshellMemberListHandler :
+  FFXIVIpcBasePacket< CWLinkshellMemberListHandler >
+{
+  uint64_t cwlsId;
+  uint32_t sequence;
+  uint32_t startIndex;
 };
 
 struct FFXIVIpcPartySetLeaderHandler :

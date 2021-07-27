@@ -300,6 +300,20 @@ void Sapphire::Network::GameConnection::clientTriggerHandler( const Packets::FFX
       player.getCurrentTerritory()->onDirectorSync( player );
       break;
     }
+    case ClientTriggerType::ReqFateInfo: // this got send when the client receives an "InitFate"-ActorControlSelf packet
+    {
+      auto fateSetup = makeZonePacket< FFXIVIpcFateSetup >( player.getId() );
+      fateSetup->data().fateId = param1;
+      fateSetup->data().startTimestamp = _time32( nullptr ); // this will do it for now
+      fateSetup->data().fateLength = 900; // standard fate length
+      player.queuePacket( fateSetup );
+
+      player.queuePacket( makeActorControlSelf( player.getId(), FateState, param1, 2 ) );
+      
+      player.queuePacket( makeActorControlSelf( player.getId(), FateUnknown, param1 ) );
+
+      break;
+    }
     case ClientTriggerType::EnterTerritoryEventFinished:// this may still be something else. I think i have seen it elsewhere
     {
       player.setOnEnterEventDone( true );
