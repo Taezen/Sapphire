@@ -59,6 +59,19 @@ namespace Sapphire::Network::Packets::Server
     uint8_t padding;
   };
 
+  struct FFXIVIpcCWLSChat : FFXIVIpcBasePacket< CWLSChat >
+  {
+    uint64_t cwlsId;
+    uint64_t playerContentId;
+    uint32_t playerCharaId;
+    uint16_t playerWorldId0;
+    uint16_t playerWorldId1;
+    uint8_t padding0;
+    char name[32];
+    char message[1024];
+    uint8_t padding1[7];
+  };
+
   struct FFXIVIpcChatBanned : FFXIVIpcBasePacket< ChatBanned >
   {
     uint8_t padding[4]; // I was not sure reinterpreting ZST is valid behavior in C++.
@@ -125,12 +138,38 @@ namespace Sapphire::Network::Packets::Server
   {
     uint32_t padding;
     uint32_t padding1;
-    uint32_t padding2;
+    uint16_t nextStartIndex; //zero when no further entries exist
+    uint16_t startIndex;
     uint8_t type;
     uint8_t sequence;
     uint16_t padding3;
 
     PlayerEntry entries[10];
+  };
+
+  struct FFXIVIpcCWFriends : FFXIVIpcBasePacket< CWFriends >
+  {
+    uint64_t unknown;
+
+    struct CWPlayerEntry
+    {
+      uint64_t contentId;
+      uint16_t homeWorldId;
+      uint16_t currentWorldId;
+      uint16_t unknown;
+      char name[32];
+      uint16_t padding;
+    } cwPlayers[10];
+  };
+
+  struct FFXIVIpcRefreshCWFriend : FFXIVIpcBasePacket< RefreshCWFriend >
+  {
+    uint64_t contentId;
+    uint16_t homeWorldId;
+    uint16_t currentWorldId;
+    uint16_t unknown;
+    char name[32];
+    uint16_t padding;
   };
 
   struct FFXIVIpcExamineSearchInfo : FFXIVIpcBasePacket< ExamineSearchInfo >
@@ -144,7 +183,7 @@ namespace Sapphire::Network::Packets::Server
     uint16_t unknown5;
     uint16_t unknown6;
     uint8_t worldId;
-    char searchMessage[193];
+    char searchMessage[194];
     char fcName[24];
     uint8_t unknown7;
     uint16_t padding1;
@@ -242,9 +281,8 @@ namespace Sapphire::Network::Packets::Server
     uint32_t category;
     uint32_t logMessage;
     uint8_t field_24;
-    uint8_t field_25;
-    uint8_t field_26[32];
-    uint32_t field_58;
+    char name[32];
+    uint8_t padding[7];
   };
 
   struct FFXIVIpcLinkshellList : FFXIVIpcBasePacket< LinkshellList >
@@ -256,9 +294,53 @@ namespace Sapphire::Network::Packets::Server
       uint8_t unknown;
       uint8_t rank;
       uint16_t padding;
-      uint8_t lsName[20];
+      char lsName[20];
       uint8_t unk[16];
-    } entry[8];
+    } LsEntries[8];
+  };
+
+  struct FFXIVIpcCWLinkshellList : FFXIVIpcBasePacket< CWLinkshellList >
+  {
+    struct CwlsEntry
+    {
+      uint64_t cwlsId;
+      uint64_t unknownId;
+      uint8_t rank;
+      char cwlsName[20];
+      uint8_t unk[19];
+    } CwlsEntries[8];
+  };
+
+  struct FFXIVIpcFellowshipList : FFXIVIpcBasePacket< FellowshipList >
+  {
+    struct FsEntry
+    {
+      uint64_t fsId;
+      uint32_t creationTimestamp;
+      uint8_t rank;
+      uint8_t hasNewMessage; //if set to 1 or higher it shows a small fellowship notfication popup
+      char fsName[60];
+      uint8_t padding[6];
+    } FsEntries[10];
+  };
+
+  struct FFXIVIpcCWLinkshellMemberList : FFXIVIpcBasePacket< CWLinkshellMemberList >
+  {
+    uint64_t cwlsId;
+    uint32_t sequence;
+    uint16_t nextStartIndex; //zero when no further entries exist
+    uint16_t startIndex;
+
+    struct CwlsMemberEntry
+    {
+      uint64_t contentId;
+      uint32_t cwlsEntryTimestamp;
+      uint16_t homeWorldId;
+      uint16_t currentWorldId;
+      uint8_t unknown[6];
+      char name[32];
+      uint16_t padding;
+    } CwlsMembersEntries[10];
   };
 
   /**
@@ -399,6 +481,19 @@ namespace Sapphire::Network::Packets::Server
     uint32_t requestId;
   };
 
+  struct FFXIVIpcFreeCompanyShortInfo : FFXIVIpcBasePacket< FreeCompanyShortInfo >
+  {
+    uint32_t unknown0[2];
+    uint8_t gcAffiliation;
+    uint8_t padding0[3];
+    uint32_t unknown1[3];
+    uint16_t unknown2;
+    char fcName[20];
+    uint8_t padding1[26];
+    char fcTag[5];
+    uint8_t padding2[27];
+  };
+
   struct FFXIVIpcExamineFreeCompanyInfo : FFXIVIpcBasePacket< ExamineFreeCompanyInfo >
   {
     char unknown[0x20]; // likely fc allegiance/icon/housing info etc
@@ -417,6 +512,13 @@ namespace Sapphire::Network::Packets::Server
     uint32_t padding4;
   };
 
+  struct FFXIVIpcFreeCompanyBoardMsg : FFXIVIpcBasePacket< FreeCompanyBoardMsg >
+  {
+    uint8_t flag; //1 = the message is displayed in chat, 2 = the message is shown in the FC menu, if send after its opened / Note: the flags cannot be combined
+    char message[192];
+    uint8_t padding[7];
+  };
+
   struct FFXIVIpcFreeCompanyUpdateShortMessage : FFXIVIpcBasePacket< FreeCompanyUpdateShortMessage >
   {
     uint32_t unknown;
@@ -425,6 +527,21 @@ namespace Sapphire::Network::Packets::Server
     uint32_t unknown3;
     uint32_t unknown5;
     char shortMessage[104];
+  };
+
+  struct FFXIVIpcFreeCompanyRanks : FFXIVIpcBasePacket< FreeCompanyRanks >
+  {
+    char fcLeader[32];
+
+    struct
+    {
+      uint16_t rankMemberCount;
+      uint8_t rankIndex;
+      char rankName[15];
+      uint8_t unknown0[38];
+      uint8_t rightsBitmask[10];
+      uint8_t unknown1[22];
+    } ranks[15];
   };
 
   struct FFXIVIpcStatusEffectList : FFXIVIpcBasePacket< StatusEffectList >
@@ -447,6 +564,7 @@ namespace Sapphire::Network::Packets::Server
   {
     uint8_t gcId;
     uint8_t gcRank[3];
+    uint8_t padding[4];
   };
 
   /**
@@ -856,17 +974,30 @@ namespace Sapphire::Network::Packets::Server
     uint16_t unknown_3;
   };
 
-  struct FFXIVIpcHateList : FFXIVIpcBasePacket< HateList >
+  struct FFXIVIpcBossHateList : FFXIVIpcBasePacket< HateListTarget >
   {
-    uint32_t numEntries;
+    uint8_t numEntries;
+    uint8_t padding0[3];
     struct
     {
       uint32_t actorId;
       uint8_t hatePercent;
-      uint8_t unknown;
-      uint16_t padding;
+      uint8_t padding[3];
+    } entry[8];
+    uint32_t padding1;
+  };
+
+  struct FFXIVIpcHateList : FFXIVIpcBasePacket< HateList >
+  {
+    uint8_t numEntries;
+    uint8_t padding0[3];
+    struct
+    {
+      uint32_t actorId;
+      uint8_t hatePercent;
+      uint8_t padding[3];
     } entry[32];
-    uint32_t padding;
+    uint32_t padding1;
   };
 
   struct FFXIVIpcHateRank : FFXIVIpcBasePacket< HateRank >
@@ -936,8 +1067,19 @@ namespace Sapphire::Network::Packets::Server
     uint32_t unknown12[4];
     uint32_t unknown13[3];
     Common::FFXIVARR_POSITION3 pos;
-    uint32_t unknown14[3];
-    uint32_t unknown15;
+    uint8_t padding0;
+    uint8_t cfPreferredRole[10];
+    uint8_t padding1[5];
+  };
+
+  struct FFXIVIpcFateSetup : FFXIVIpcBasePacket< FateSetup >
+  {
+    uint16_t fateId;
+    uint16_t padding0[3];
+    uint32_t startTimestamp;
+    uint32_t padding1;
+    int32_t fateLength; //fate length in seconds
+    uint32_t padding2;
   };
 
 
@@ -945,177 +1087,208 @@ namespace Sapphire::Network::Packets::Server
   * Structural representation of the packet sent by the server to initialize
   * the client UI upon initial connection.
   */
+//#pragma pack(push, 1) //need this for proper alignment :(
   struct FFXIVIpcPlayerSetup : FFXIVIpcBasePacket< PlayerSetup >
   {
-    // plain C types for a bit until the packet is actually fixed.
-    // makes conversion between different editors easier.
     uint64_t contentId;
-    unsigned int unknown8;
-    unsigned int unknownC;
-    unsigned int charId;
-    unsigned int restedExp;
-    unsigned int companionCurrentExp;
-    unsigned int unknown1C;
-    unsigned int fishCaught;
-    unsigned int useBaitCatalogId;
-    unsigned int unknown28;
-    unsigned short unknownPvp2C;
-    unsigned short unknown3;
-    unsigned int pvpFrontlineOverallCampaigns;
-    unsigned int unknownTimestamp34;
-    unsigned int unknownTimestamp38;
-    unsigned int unknown3C;
-    unsigned int unknown40;
-    unsigned int unknown44;
+    uint32_t unknown8;
+    uint32_t unknownC;
+    uint32_t charId;
+    uint32_t restedExp;
+    uint32_t companionCurrentExp;
+    uint32_t unknown1C;
+    uint32_t fishCaught;
+    uint32_t useBaitCatalogId;
+    uint32_t spearfishCaught;
+    uint16_t unknownPvp2C;
+    uint16_t unknown3;
+    uint32_t pvpFrontlineOverallCampaigns;
+    uint32_t unknownTimestamp34;
+    uint32_t unknownTimestamp38;
+    uint32_t unknown3C;
+    uint32_t unknown40;
+    uint32_t wondrousTails; //TODO: implement the seed generator
     float companionTimePassed;
-    unsigned int unknown4C;
-    unsigned short unknown50;
-    unsigned short unknownPvp52[4];
-    unsigned short playerCommendations;
-    unsigned short unknown5C;
-    unsigned short unknown5E;
-    unsigned short pvpFrontlineWeeklyCampaigns;
-    unsigned short enhancedAnimaGlassProgress;
-    unsigned short unknown64[4];
-    unsigned short pvpRivalWingsTotalMatches;
-    unsigned short pvpRivalWingsTotalVictories;
-    unsigned short pvpRivalWingsWeeklyMatches;
-    unsigned short pvpRivalWingsWeeklyVictories;
-    unsigned char maxLevel;
-    unsigned char expansion;
-    unsigned char unknown76;
-    unsigned char unknown77;
-    unsigned char very_unknown;
-    unsigned char race;
-    unsigned char tribe;
-    unsigned char gender;
-    unsigned char currentJob;
-    unsigned char currentClass;
-    unsigned char deity;
-    unsigned char namedayMonth;
-    unsigned char namedayDay;
-    unsigned char cityState;
-    unsigned char homepoint;
-    unsigned char unknown82;
-    unsigned char petHotBar;
-    unsigned char companionRank;
-    unsigned char companionStars;
-    unsigned char companionSp;
-    unsigned char companionUnk86;
-    unsigned char companionColor;
-    unsigned char companionFavoFeed;
-    unsigned char unknown89;
-    unsigned char unknown8A[4];
-    unsigned char hasRelicBook;
-    unsigned char relicBookId;
-    unsigned char unknown90[4];
-    unsigned char craftingMasterMask;
-    unsigned char unknown95[9];
-    unsigned char unknown9F[2];
-    unsigned char unknownA1[6];
-    unsigned int exp[Common::CLASSJOB_SLOTS];
-    unsigned int unknown108;
-    unsigned int pvpTotalExp;
-    unsigned int unknownPvp110;
-    unsigned int pvpExp;
-    unsigned int pvpFrontlineOverallRanks[3];
-    unsigned short levels[Common::CLASSJOB_SLOTS];
-    /*
-    unsigned short unknown15C[9];
-    unsigned short u1;
-    unsigned short u2;
-    unsigned short unknown112[23];
-    unsigned short fishingRecordsFish[26];
-    unsigned short beastExp[11];
-    unsigned short unknown1EA[5];
-    unsigned short pvpFrontlineWeeklyRanks[3];
-    unsigned short unknownMask1FA[4];
-    unsigned char companionName[21];
-    unsigned char companionDefRank;
-    unsigned char companionAttRank;
-    unsigned char companionHealRank;
-    unsigned char u19[8];
-    unsigned char mountGuideMask[22];
-    unsigned char u19_2;
-    */
-    unsigned char unknown5_55a[178];
-    unsigned char companionName[21];
-    unsigned char companionDefRank;
-    unsigned char companionAttRank;
-    unsigned char companionHealRank;
-    unsigned char mountGuideMask[29];
+    uint32_t unknown4C;
+    uint16_t unknown50;
+    uint16_t unknownPvp52[4];
+    uint16_t playerCommendations;
+    uint16_t unknown5C;
+    uint16_t unknown5E;
+    uint16_t pvpFrontlineWeeklyCampaigns;
+    uint16_t enhancedAnimaGlassProgress;
+    uint16_t unknown64;
+    uint16_t unknown65;
+    uint16_t unknown66;
+    uint16_t unknown67;
+    uint16_t pvpRivalWingsTotalMatches;
+    uint16_t pvpRivalWingsTotalVictories;
+    uint16_t pvpRivalWingsWeeklyMatches;
+    uint16_t pvpRivalWingsWeeklyVictories;
+    uint8_t maxLevel;
+    uint8_t expansion;
+    uint8_t unknown76;
+    uint8_t unknown77;
+    uint8_t very_unknown;
+    uint8_t race;
+    uint8_t tribe;
+    uint8_t gender;
+    uint8_t currentJob;
+    uint8_t currentClass;
+    uint8_t deity;
+    uint8_t namedayMonth;
+    uint8_t namedayDay;
+    uint8_t cityState;
+    uint8_t homepoint;
+    uint8_t unknown82;
+    uint8_t petHotBar;
+    uint8_t companionRank;
+    uint8_t companionStars;
+    uint8_t companionSp;
+    uint8_t companionUnk86;
+    uint8_t companionColor;
+    uint8_t companionFavoFeed;
+    uint8_t unknown89;
+    uint8_t unknown8A;
+    uint8_t unknown8B;
+    uint8_t unknown8C;
+    uint8_t unknown8D;
+    uint8_t curRelicId; //See "RelicItem", beginning with index 1 from column "1: Gladiator"
+    uint8_t relicBookId;
+    uint8_t unlockedSightseeingLogs[2]; //[0] = if set to 2 it unlocks the second part for ARR, [1] = if set to 3 it unlocks the sightseeing logs for HW
+    bool unknown92;
+    uint8_t unknown93;
+    uint8_t craftingMasterMask;
+    uint8_t unknown95;
+    uint8_t unlockedFlyingAreas0; //Unlocks flying for: Coerthas Western Highlands, The Dravanian Forelands, The Dravanian Hinterlands, The Churning Mists, The Sea of Clouds, Azys Lla, The Fringes, The Ruby Sea
+    uint8_t unknown97;
+    bool unknown98;
+    uint8_t unknown99;
+    uint8_t unknown9A;
+    uint8_t unknown9B;
+    uint8_t unknown9D;
+    uint8_t unknown9E;
+    uint8_t ishgardRestorationFolklores; //flag starting from 2 and ends with 5 / not a bitmask
+    uint8_t unknownA0;
+    bool unknownA1;
+    uint8_t unknownA2[2];
+    uint8_t unknownA4[2]; //Actually a uint16_t, but it has to be in this way for proper alignment
+    uint8_t unknownA6;
+    uint32_t exp[Common::CLASSJOB_SLOTS];
+    uint32_t pvpTotalExp;
+    uint32_t unknownPvp110;
+    uint32_t pvpExp;
+    uint32_t pvpFrontlineOverallRanks[3];
+    uint32_t unknown128;
+    uint16_t levels[Common::CLASSJOB_SLOTS];
+    
+    uint16_t unknown5_3a[2][4];
+    uint16_t fishingRecords[2][26]; //[0][X] = fishCatalogId, [1][X] = fish size // [X][0] - [X][9] = fishes, [X][10] - [X][25] = spearfishes
+    uint16_t beastExp[14];
+    uint16_t unknown21C[5];
+    uint16_t pvpFrontlineWeeklyRanks[3];
+    uint16_t customDeliverySatisfaction[7];
+    char companionName[21];
+    uint8_t companionDefRank;
+    uint8_t companionAttRank;
+    uint8_t companionHealRank;
+    uint8_t mountGuideMask[26];
+    uint8_t fashionAccessories[3];
     //==
     char name[32];
-    unsigned char unknownOword[16];
-    unsigned char unknownOw;
-    unsigned char unlockBitmask[64];
-    unsigned char aetheryte[21];
-    unsigned char discovery[445];
-    unsigned char howto[34];
-    unsigned char minions[55];
-    unsigned char chocoboTaxiMask[10];
-    unsigned char watchedCutscenes[137];
-    unsigned char companionBardingMask[11];
-    unsigned char companionEquippedHead;
-    unsigned char companionEquippedBody;
-    unsigned char companionEquippedLegs;
-    /*
-    unsigned char unknown52A[4];
-    unsigned char unknownMask52E[11];
-    unsigned char fishingGuideMask[105];
-    unsigned char fishingSpotVisited[31];
-    unsigned char unknown59A[27];
-    unsigned char unknown5A9[7];
-    unsigned char beastRank[11];
-    unsigned char unknownPvp5AB[11];
-    unsigned char unknown5B9[5];
-    */
-    unsigned char unknown5_45b[236];
+    uint8_t unknownOword[16];
+    uint8_t unknownOw;
+    uint8_t unlockBitmask[64];
+    uint8_t aetheryte[21];
+    uint8_t unknownUnlock[5];
+    //If "DiscoveryArrayByte" is set to true, then this place is in discovery2. If set to false then it's in discovery4. The "DiscoveryIndex" represents the index in the corresponding array.
+    uint16_t discovery2[160]; //Includes all discovery flags that are 2 Bytes in size
+    uint16_t discovery4[60]; //Includes all discovery flags that are 4 Bytes in size / Actually a uint32_t array, but it has to be in this way for proper alignment
+    uint8_t howto[35];
+    uint8_t minions[54];
+    uint8_t chocoboTaxiMask[10];
+    uint8_t watchedCutscenes[137];
+    uint8_t companionBardingMask[11];
+    uint8_t companionEquippedHead;
+    uint8_t companionEquippedBody;
+    uint8_t companionEquippedLegs;
+    
+    uint8_t unknown5_45b[4];
+    uint8_t unknown_DOH_DOL[11];
+    uint8_t fishingGuideMask[128];
+    uint8_t fishingSpotVisited[32];
+    uint8_t spearfishingGuideMask[27];
+    uint8_t spearfishingSpotVisited[5];
+    uint8_t unknown5_67b[3];
+    uint8_t beastRank[14];
+    uint8_t unknown9[12];
     //==
-    unsigned char pose;
-    /*
-    unsigned char unknown5B91;
-    unsigned char challengeLogComplete[9];
-    unsigned char weaponPose;
-    unsigned char unknownMask673[10];
-    unsigned char unknownMask5DD[28];
-    unsigned char relicCompletion[12];
-    unsigned char sightseeingMask[26];
-    unsigned char huntingMarkMask[55];
-    unsigned char tripleTriadCards[32];
-    unsigned char u12[11];
-    unsigned char u13;
-    unsigned char aetherCurrentMask[22];
-    unsigned char u10[3];
-    */
-    unsigned char unknown5_55b[295];
+    uint8_t pose; //0 = standard, 1 = EmoteId 91, 2 = EmoteId 92, 3 = EmoteId 107, 4 = EmoteId 108, 5 = EmoteId 218, 6 = EmoteId 219
+    uint8_t battlePose; //0 = standard, 1 = EmoteId 93
+    uint8_t sittingPose; //0 = standard, 1 = EmoteId 95, 2 = EmoteId 96
+    uint8_t groundSittingPose; //0 = standard, 1 = EmoteId 97, 2 = EmoteId 98, 3 = EmoteId 117
+    uint8_t lyingPose; //0 = standard, 1 = EmoteId 99, 2 = EmoteId 100
+    
+    uint8_t specialHintsFlags;
+    //specialHintsFlags findings
+    //4 = Chocobo companion is missing message, if you try to open the companion menu
+    //8 = Displays the Mentor renewal hint
+
+    uint8_t unknown100;
+    uint8_t renewalOfMentorStatus; //This also shows the Mentor renewal hint, if flag 0x01 is set / no other use found
+    uint8_t challengeLogComplete[10];
+    uint8_t unknown5_46c[3];
+    uint8_t unlockedMasterbooks[11];
+    uint8_t unknown5_47b[28];
+    uint8_t relicBookProgress[12]; //[0] - [9] = monster kill count, [10] - [11] = bitmask for the rest of the book
+    uint8_t sightseeingMask[32];
+    uint8_t unknown6[78]; //huntingMarkMask???
+    uint8_t tripleTriadCards[41];
+    uint8_t unknownUnlock2[13];
+    uint8_t unlockedFlyingAreas1[2]; //Unlocks flying for: The Peaks, Yanxia, The Lochs, The Azim Steppe, Lakeland, Amh Araeng, Il Mheg, Kholusia, The Rak'tika Greatwood, The Tempest
     //==
-    unsigned char orchestrionMask[40]; // this field may already be extended, if it is, the beginning bytes are at the end of unknown5_55b
-    unsigned char hallOfNoviceCompletion[3];
-    unsigned char animaCompletion[11];
-    unsigned char unknown5_55c[35];
-    unsigned char unlockedRaids[28];
-    unsigned char unlockedDungeons[18];
-    unsigned char unlockedGuildhests[10];
+    uint8_t aetherCurrentMask[34];
+    uint8_t unlockedFolklores[3]; //[0] = miner, [1] = botanist, [2] = fisher / Except for the "Ishgard Restoration"-Folklore
+    uint8_t orchestrionMask[61];
+    uint8_t hallOfNoviceCompletion[3];
+    uint8_t animaCompletion[11];
+    uint8_t unknown5_3e[16];
+    uint8_t unknown5_4e[4];
+    uint8_t customDeliveryLvl[7];
+    uint8_t weeklyCustomDeliveryCount[7];
+    uint8_t unlockedExtraCFContent;
+    //1 = Unlocks Astralagos and Hidden Gorge
+    //2 = Doman Mahjong
+    //4 = ??? (It's set in the original packet)
+    
+    uint8_t unlockedRaids[28];
+    uint8_t unlockedDungeons[18];
+    uint8_t unlockedGuildhests[10];
+>>>>>>> 6a283be9e09fac2a54a25e93163c0afe9b488480
     /*
       at least 8 bytes at most 10 bytes in unlockedTrials not confirmed, adjust unlockedPvp so they share a total of 15 bytes and sync with clearedTrials/clearedPvp.
     */
-    unsigned char unlockedTrials[9];
-    unsigned char unlockedPvp[6];
+    uint8_t unlockedTrials[10];
+    uint8_t unlockedPvp[3];
+    uint8_t unlockedPvp2[2];
     //==
-    unsigned char clearedRaids[28];
-    unsigned char clearedDungeons[18];
-    unsigned char clearedGuildhests[10];
-    unsigned char clearedTrials[9];
-    unsigned char clearedPvp[6];
+    uint8_t clearedRaids[28];
+    uint8_t clearedDungeons[18];
+    uint8_t clearedGuildhests[10];
+    uint8_t clearedTrials[10];
+    uint8_t clearedPvp[3];
+    uint8_t clearedPvp2[2];
     /*
-    unsigned short fishingRecordsFishWeight[26];
-    unsigned int exploratoryMissionNextTimestamp;
-    unsigned char pvpLevel;
+    uint32_t exploratoryMissionNextTimestamp;
+
     */
-    unsigned char unknown5_55d[9];
+    uint8_t unknown5_45d[4];
+    uint8_t unknown5_461;
+    uint8_t unknown5_462;
+    uint8_t unknown5_463[3];
     //==
   };
+//#pragma (pop)
 
 
   /**
@@ -1196,6 +1369,12 @@ namespace Sapphire::Network::Packets::Server
     uint32_t roleActions[10];
   };
 
+
+  struct FFXIVIpcPlayerStatusEffectList : FFXIVIpcBasePacket< PersistantEffect >
+  {
+    Common::StatusEffect effect[30];
+  };
+
   /**
   * Structural representation of the packet sent by the server
   * to update a players appearance
@@ -1229,7 +1408,7 @@ namespace Sapphire::Network::Packets::Server
     char padding1[8];
     uint64_t mainWeaponModel;
     uint64_t secWeaponModel;
-    uint8_t unknown2;
+    uint16_t unknown2;
     uint16_t worldId;
     char unknown3[12];
     struct ItemData
@@ -1269,7 +1448,7 @@ namespace Sapphire::Network::Packets::Server
   {
     uint32_t containerSequence;
     uint32_t unknown;
-    uint16_t containerId;
+    Common::InventoryType containerId;
     uint16_t slot;
     uint32_t quantity;
     uint32_t catalogId;
@@ -1303,7 +1482,8 @@ namespace Sapphire::Network::Packets::Server
   {
     uint32_t containerSequence;
     uint32_t numItems;
-    uint32_t containerId;
+    Common::InventoryType containerId;
+    uint16_t padding;
     uint32_t unknown;
   };
 
@@ -1314,11 +1494,12 @@ namespace Sapphire::Network::Packets::Server
   struct FFXIVIpcCurrencyCrystalInfo : FFXIVIpcBasePacket< CurrencyCrystalInfo >
   {
     uint32_t containerSequence;
-    uint16_t containerId;
+    Common::InventoryType containerId;
     uint16_t slot;
     uint32_t quantity;
     uint32_t unknown;
-    uint32_t catalogId;
+    Common::CurrencyCrystalType catalogId;
+    uint16_t padding;
     uint32_t unknown1;
     uint32_t unknown2;
     uint32_t unknown3;
@@ -1335,16 +1516,21 @@ namespace Sapphire::Network::Packets::Server
   {
     uint32_t sequence;
     uint16_t type;
-    uint16_t padding1;
+    uint16_t padding0;
     uint32_t ownerId;
-    uint32_t storageId;
+    Common::InventoryType storageId;
+    uint16_t padding1;
     uint16_t slotId;
     uint16_t padding2;
     uint32_t stackSize;
     uint32_t catalogId;
-    uint32_t someActorId;
-    int32_t targetStorageId;
-    uint32_t padding3[3];
+    uint32_t targetActorId;
+    Common::InventoryType targetStorageId;
+    uint16_t padding3;
+    uint16_t targetSlotId;
+    uint16_t padding4;
+    uint32_t targetStackSize;
+    uint32_t targetCatalogId;
   };
 
 
@@ -1366,7 +1552,7 @@ namespace Sapphire::Network::Packets::Server
   {
     uint32_t sequence;
     uint32_t unknown;
-    uint16_t containerId;
+    Common::InventoryType containerId;
     uint16_t slot;
     uint32_t quantity;
     uint32_t catalogId;
@@ -1536,8 +1722,8 @@ namespace Sapphire::Network::Packets::Server
   */
   struct FFXIVIpcQuestCompleteList : FFXIVIpcBasePacket< QuestCompleteList >
   {
-    uint8_t questCompleteMask[487];
-    uint8_t unknownCompleteMask[73];
+    uint8_t questCompleteMask[512]; //to be checked
+    uint8_t unknownCompleteMask[112];
   };
 
   /**
@@ -1703,6 +1889,24 @@ namespace Sapphire::Network::Packets::Server
     uint32_t unknown3;
   };
 
+  struct FFXIVIpcCFPreferredRole : FFXIVIpcBasePacket< CFPreferredRole >
+  {
+    uint8_t padding0;
+
+    /*
+     * The order for the array is the same as in the "ContentRoulette" table,
+     * if filtered for roulette content and except the frontline roulette.
+     * (Column 28 == 1 && Column 29 == 0)
+     * 
+     * possible values:
+     * 1 = tank
+     * 2 = damage dealer
+     * 4 = healer
+     */
+    uint8_t preferredRole[10];
+    uint8_t padding1[5];
+  };
+
   struct FFXIVIpcEorzeaTimeOffset : FFXIVIpcBasePacket< EorzeaTimeOffset >
   {
     uint64_t timestamp;
@@ -1838,6 +2042,46 @@ namespace Sapphire::Network::Packets::Server
     uint32_t pad3[4];
   };
 
+  template< int ArgCount >
+  struct FFXIVIpcDirectorMessageN
+  {
+    uint32_t directorId; //0 when no director exists
+    uint32_t messageId; //See "LogMessage" for IDs
+    uint8_t paramCount; //The number of params the game have to read from the packet
+    uint8_t padding0[3];
+    uint32_t params[ArgCount];
+    uint32_t padding1;
+  };
+
+  struct FFXIVIpcDirectorMessage :
+    FFXIVIpcBasePacket< DirectorMessage >,
+    FFXIVIpcDirectorMessageN< 2 >
+  {
+  };
+
+  struct FFXIVIpcDirectorMessage4 :
+    FFXIVIpcBasePacket< DirectorMessage4 >,
+    FFXIVIpcDirectorMessageN< 4 >
+  {
+  };
+
+  struct FFXIVIpcDirectorMessage8 :
+    FFXIVIpcBasePacket< DirectorMessage8 >,
+    FFXIVIpcDirectorMessageN< 8 >
+  {
+  };
+
+  struct FFXIVIpcDirectorMessage16 :
+    FFXIVIpcBasePacket< DirectorMessage16 >,
+    FFXIVIpcDirectorMessageN< 16 >
+  {
+  };
+
+  struct FFXIVIpcDirectorMessage32 :
+    FFXIVIpcBasePacket< DirectorMessage32 >,
+    FFXIVIpcDirectorMessageN< 32 >
+  {
+  };
 
   struct FFXIVIpcActorGauge : FFXIVIpcBasePacket< ActorGauge >
   {
@@ -1990,7 +2234,7 @@ namespace Sapphire::Network::Packets::Server
 
   struct FFXIVIpcHousingInternalObjectSpawn : FFXIVIpcBasePacket< HousingInternalObjectSpawn >
   {
-    uint16_t containerId;
+    Common::InventoryType containerId;
     uint8_t containerOffset;
     uint8_t pad1;
 
@@ -2104,10 +2348,28 @@ namespace Sapphire::Network::Packets::Server
 
     char otherName[32];
   };
+
+  struct FFXIVIpcRetainerSaleHistory : FFXIVIpcBasePacket < RetainerSaleHistory >
+  {
+    uint64_t retainerId;
+
+    struct SaleEntry
+    {
+      uint32_t itemId;
+      uint32_t salePrice;
+      uint32_t saleTimestamp;
+      uint32_t itemCount;
+      uint8_t isHq; // 1 if item is hq, otherwise 0
+      uint8_t unknown[2];
+      char buyerName[32];
+      uint8_t padding;
+    } saleEntries[20];
+  };
   
   struct FFXIVIpcRetainerInformation : FFXIVIpcBasePacket< RetainerInformation >
   {
-    uint8_t unknown0[8];
+    uint32_t sequence;
+    uint8_t unknown0[4];
     uint64_t retainerId;
     uint8_t hireOrder;
     uint8_t itemCount;
@@ -2122,6 +2384,29 @@ namespace Sapphire::Network::Packets::Server
     uint32_t retainerTaskComplete;
     uint8_t unknown14;
     char retainerName[20];
+    uint8_t padding[19];
+  };
+
+  struct FFXIVIpcRetainerShortInfo : FFXIVIpcBasePacket< RetainerShortInfo >
+  {
+    uint64_t retainerId;
+    uint32_t unknown0[3];
+    uint8_t unknown1;
+    char name[20];
+    uint8_t padding[16];
+  };
+
+  struct FFXIVIpcRetainerList : FFXIVIpcBasePacket < RetainerList >
+  {
+    struct RetainerEntry
+    {
+      uint64_t retainerId;
+      uint32_t unknownTimestamp;
+      uint8_t cityId;
+      uint8_t unknown[2];
+      char name[20];
+      uint8_t padding[13];
+    } retainers[10];
   };
 
   struct FFXIVIpcCharaVisualEffect : FFXIVIpcBasePacket< CharaVisualEffect >
@@ -2238,6 +2523,58 @@ namespace Sapphire::Network::Packets::Server
     char memberName[32];
     uint8_t padding[3];
   };
+
+  struct FFXIVIpcDesynthStats : FFXIVIpcBasePacket< DesynthStats >
+  {
+    uint16_t desynthPoints[8]; // This is actually an short represented as float ingame
+  };
+
+  struct FFXIVIpcDesynthResult : FFXIVIpcBasePacket< DesynthResult >
+  {
+    uint32_t unknown0[2];
+    uint32_t srcItemId;
+    uint32_t dstItemId;
+    uint32_t dstQuantity;
+    uint32_t unknown1[5];
+    uint32_t classId;
+    uint32_t desynthPoints; //Represented as Int
+    uint32_t unknown2[6];
+  };
+
+  struct FFXIVIpcLeveCompleteList : FFXIVIpcBasePacket< LeveCompleteList >
+  {
+    uint8_t leveCompleteMask[200];
+  };
+
+  struct FFXIVIpcLeveAllowanceInfo : FFXIVIpcBasePacket< LeveAllowanceInfo >
+  {
+    uint32_t nextAllowanceTimestamp;
+    uint8_t currentAllowances;
+    uint8_t padding[11];
+  };
+
+  struct FFXIVIpcGathererGuide : FFXIVIpcBasePacket< GathererGuide >
+  {
+    uint8_t gathererGuideMask[80]; //Tracks already collected items for miner and botanist
+  };
+
+  struct FFXIVIpcGathererGuideViewedMask : FFXIVIpcBasePacket< GathererGuideViewedMask >
+  {
+    uint8_t viewedMask[4][5];  //Tracks already viewed level regions for miner and botanist
+    uint32_t padding[5];
+  };
+
+  struct FFXIVIpcCrafterGuide : FFXIVIpcBasePacket< CrafterGuide >
+  {
+    uint8_t crafterGuideMask[592]; //Tracks already crafted items
+  };
+
+  struct FFXIVIpcCrafterGuideViewedMask : FFXIVIpcBasePacket< CrafterGuideViewedMask >
+  {
+    uint8_t viewedMask[8][5];  //Tracks already viewed level regions
+    uint32_t padding[10];
+  };
+
 }
 
 #endif /*_CORE_NETWORK_PACKETS_SERVER_IPC_H*/

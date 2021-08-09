@@ -1,6 +1,5 @@
 #include "PlayerMinimal.h"
 
-#include <Common.h>
 #include <Exd/ExdDataGenerated.h>
 
 #include <Database/DatabaseDef.h>
@@ -334,9 +333,6 @@ void PlayerMinimal::saveAsNew()
   createInvDbContainer( InventoryType::ArmoryMain );
   createInvDbContainer( InventoryType::ArmorySoulCrystal );
 
-  createInvDbContainer( InventoryType::Currency );
-  createInvDbContainer( InventoryType::Crystal );
-
   auto stmtMonsterNote = g_charaDb.getPreparedStatement( Db::ZoneDbStatements::CHARA_MONSTERNOTE_INS );
   stmtMonsterNote->setInt( 1, m_id );
   for( uint8_t i = 1; i <= 12; ++i )
@@ -408,7 +404,7 @@ void PlayerMinimal::saveAsNew()
                      "container_" + std::to_string( GearSetSlot::Wrist ) + ", "
                      "container_" + std::to_string( GearSetSlot::Ring1 ) + ", UPDATE_DATE ) "
                      "VALUES ( " +
-                     std::to_string( InventoryType::GearSet0 ) + ", " +
+                     std::to_string( static_cast< uint16_t >( InventoryType::GearSet0 ) ) + ", " +
                      std::to_string( m_id ) + ", " +
                      std::to_string( uniqueId ) + ", " +
                      std::to_string( bodyUid ) + ", " +
@@ -432,11 +428,11 @@ void PlayerMinimal::insertDbGlobalItem( uint32_t itemId, uint64_t uniqueId ) con
   g_charaDb.directExecute( stmtItemGlobal );
 }
 
-void PlayerMinimal::createInvDbContainer( uint16_t slot ) const
+void PlayerMinimal::createInvDbContainer( Common::InventoryType slot ) const
 {
   auto stmtCreateInv = g_charaDb.getPreparedStatement( Db::CHARA_ITEMINV_INS );
   stmtCreateInv->setInt( 1, m_id );
-  stmtCreateInv->setInt( 2, slot );
+  stmtCreateInv->setInt( 2, static_cast< uint16_t >( slot ) );
   g_charaDb.directExecute( stmtCreateInv );
 }
 

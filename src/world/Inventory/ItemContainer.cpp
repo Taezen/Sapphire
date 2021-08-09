@@ -9,7 +9,7 @@
 #include "Forwards.h"
 #include "ItemContainer.h"
 
-Sapphire::ItemContainer::ItemContainer( uint16_t storageId, uint8_t maxSize, const std::string& tableName,
+Sapphire::ItemContainer::ItemContainer( Common::InventoryType storageId, uint8_t maxSize, const std::string& tableName,
                                         bool isMultiStorage, bool isPersistentStorage ) :
   m_id( storageId ),
   m_size( maxSize ),
@@ -25,7 +25,7 @@ Sapphire::ItemContainer::~ItemContainer()
 
 }
 
-uint16_t Sapphire::ItemContainer::getId() const
+Sapphire::Common::InventoryType Sapphire::ItemContainer::getId() const
 {
   return m_id;
 }
@@ -80,7 +80,7 @@ int8_t Sapphire::ItemContainer::getFreeSlot()
 Sapphire::ItemPtr Sapphire::ItemContainer::getItem( uint8_t slotId )
 {
 
-  if( ( slotId > m_size ) )
+  if( ( slotId >= m_size ) )
   {
     Logger::error( "Slot out of range {0}", slotId );
     return nullptr;
@@ -91,7 +91,7 @@ Sapphire::ItemPtr Sapphire::ItemContainer::getItem( uint8_t slotId )
 
 void Sapphire::ItemContainer::setItem( uint8_t slotId, ItemPtr pItem )
 {
-  if( slotId > m_size )
+  if( slotId >= m_size )
   {
     Logger::error( "Slot out of range {0}", slotId );
     return;

@@ -4,6 +4,7 @@
 #include <Network/GamePacket.h>
 #include "Actor/Player.h"
 #include "Inventory/Item.h"
+#include "Inventory/CurrencyCrystal.h"
 #include "Forwards.h"
 
 namespace Sapphire::Network::Packets::Server
@@ -15,20 +16,26 @@ namespace Sapphire::Network::Packets::Server
   class UpdateInventorySlotPacket : public ZoneChannelPacket< FFXIVIpcUpdateInventorySlot >
   {
   public:
-    UpdateInventorySlotPacket( uint32_t playerId, uint8_t slot, uint16_t storageId, const Item& item ) :
+    UpdateInventorySlotPacket( uint32_t playerId, uint8_t slot, Common::InventoryType storageId, const Item& item ) :
       ZoneChannelPacket< FFXIVIpcUpdateInventorySlot >( playerId, playerId )
     {
       initialize( slot, storageId, item );
     };
 
-    UpdateInventorySlotPacket( uint32_t playerId, uint8_t slot, uint16_t storageId ) :
+    UpdateInventorySlotPacket( uint32_t playerId, uint8_t slot, Common::InventoryType storageId, const CurrencyCrystal& item ) :
+      ZoneChannelPacket< FFXIVIpcUpdateInventorySlot >( playerId, playerId )
+    {
+      initialize( slot, storageId, item );
+    };
+
+    UpdateInventorySlotPacket( uint32_t playerId, uint8_t slot, Common::InventoryType storageId ) :
       ZoneChannelPacket< FFXIVIpcUpdateInventorySlot >( playerId, playerId )
     {
       initialize( slot, storageId );
     };
 
   private:
-    void initialize( uint8_t slot, uint16_t storageId, const Item& item )
+    void initialize( uint8_t slot, Common::InventoryType storageId, const Item& item )
     {
       m_data.sequence = 0;
       m_data.containerId = storageId;
@@ -54,7 +61,33 @@ namespace Sapphire::Network::Packets::Server
       //uint8_t buffer5;
     };
 
-    void initialize( uint8_t slot, uint16_t storageId )
+    void initialize( uint8_t slot, Common::InventoryType storageId, const CurrencyCrystal& currencyCrystal )
+    {
+      m_data.sequence = 0;
+      m_data.containerId = storageId;
+      m_data.slot = slot;
+      m_data.quantity = currencyCrystal.getAmount();
+      m_data.catalogId = static_cast< uint16_t >( currencyCrystal.getId() );
+      m_data.reservedFlag = 0; // no idea
+      m_data.signatureId = 0;
+      m_data.hqFlag = 0;
+      m_data.condition = 30000;
+      m_data.spiritBond = 0;
+      m_data.color = 0;
+      m_data.glamourCatalogId = 0;
+      m_data.materia1 = 0;
+      m_data.materia2 = 0;
+      m_data.materia3 = 0;
+      m_data.materia4 = 0;
+      m_data.materia5 = 0;
+      m_data.buffer1 = 0;
+      m_data.buffer2 = 0;
+      m_data.buffer3 = 0;
+      m_data.buffer4 = 0;
+      m_data.buffer5 = 0;
+    };
+
+    void initialize( uint8_t slot, Common::InventoryType storageId )
     {
       m_data.sequence = 0;
       m_data.containerId = storageId;

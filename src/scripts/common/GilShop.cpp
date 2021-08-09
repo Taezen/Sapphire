@@ -39,7 +39,7 @@ private:
       else if( result.param2 == 2 && result.actorId != player.getId() )
       {
         auto& shopMgr = Common::Service< Sapphire::World::Manager::ShopMgr >::ref();
-        shopMgr.shopSellItem( player, result.eventId, result.param3, result.param4 );
+        shopMgr.shopSellItem( player, result.eventId, static_cast< Common::InventoryType>( result.param3 ), result.param4 );
       }
       //buy back
       else if( result.param2 == 3 && result.actorId != player.getId() )

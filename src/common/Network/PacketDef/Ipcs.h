@@ -49,6 +49,8 @@ namespace Sapphire::Network::Packets
     ActorFreeSpawn = 0x0210, // updated 5.58
     InitZone = 0x0100, // updated 5.58
 
+    FateSetup = 0x01E6, // updated 5.58
+
     EffectResult = 0x0151, // updated 5.58
     ActorControl = 0x0264, // updated 5.58
     ActorControlSelf = 0x0314, // updated 5.58
@@ -82,10 +84,13 @@ namespace Sapphire::Network::Packets
 
     Chat = 0x0220, // updated 5.58
     PartyChat = 0x0065,
+    CWLSChat = 0x0072,
 
     WorldVisitList = 0xF0FE, // added 4.5
 
     SocialList = 0x0396, // updated 5.58
+    CWFriends = 0x02BF, // updated 5.58
+    RefreshCWFriend = 0x0152, // updated 5.58
 
     ExamineSearchInfo = 0x031F, // updated 5.58
     UpdateSearchInfo = 0x0219, // updated 5.58
@@ -104,6 +109,10 @@ namespace Sapphire::Network::Packets
     BlackList = 0x028A, // updated 5.58
 
     LinkshellList = 0x02DD, // updated 5.58
+    CWLinkshellList = 0x015D, // updated 5.58
+    FellowshipList = 0x0287, // updated 5.58
+
+    CWLinkshellMemberList = 0x02C5, // updated 5.58
 
     MailDeleteRequest = 0xF12B, // updated 5.0
 
@@ -118,13 +127,17 @@ namespace Sapphire::Network::Packets
     MarketBoardItemListingCount = 0x0275, // updated 5.58
     MarketBoardItemListingHistory = 0x0112, // updated 5.58
     MarketBoardItemListing = 0x00F5, // updated 5.58
+    MarketBoardPurchase = 0x00CD, // updated 5.58
     
     CharaFreeCompanyTag = 0x013B, // updated 4.5
     FreeCompanyBoardMsg = 0x028D, // updated 5.58
     FreeCompanyInfo = 0x0346, // updated 5.58
+    FreeCompanyShortInfo = 0x0263, // updated 5.58
     ExamineFreeCompanyInfo = 0x00B7, // updated 5.58
+    FreeCompanyRanks = 0x01D8, // updated 5.58
 
     FreeCompanyUpdateShortMessage = 0xF157, // added 5.0
+    FreeCompanyDialog = 0x0328, // updated 5.58
 
     StatusEffectList = 0x01C5, // updated 5.58
     EurekaStatusEffectList = 0x0167, // updated 5.18
@@ -151,6 +164,7 @@ namespace Sapphire::Network::Packets
     PartyList = 0x02BD, // updated 5.58
     PartyMessage = 0x0318, // updated 5.58
     HateRank = 0x02C0, // updated 5.58
+    HateListTarget = 0x02C0, // updated 5.58
     HateList = 0x01B4, // updated 5.58
     ObjectSpawn = 0x0104, // updated 5.58
     ObjectDespawn = 0x030D, // updated 5.58
@@ -168,9 +182,10 @@ namespace Sapphire::Network::Packets
     CharaNameReq = 0x031C, // updated 5.58
 
     // nb: see #565 on github
-    UpdateRetainerItemSalePrice = 0xF19F, // updated 5.0
     RetainerSaleHistory = 0x01D3, // updated 5.58
     RetainerInformation = 0x0069, // updated 5.58
+    RetainerShortInfo = 0x02AA, // updated 5.58
+    RetainerList = 0x0074, // updated 5.58
 
     SetLevelSync = 0x1186, // not updated for 4.4, not sure what it is anymore
 
@@ -179,6 +194,10 @@ namespace Sapphire::Network::Packets
     InventoryTransactionFinish = 0x01A3, // updated 5.58
     InventoryTransaction = 0x03AC, // updated 5.58
     CurrencyCrystalInfo = 0x0394, // updated 5.58
+
+    LeveActiveList = 0x03AD, // updated 5.58
+    LeveCompleteList = 0x02CE, // updated 5.58
+    LeveAllowanceInfo = 0x0387, // updated 5.58
 
     InventoryActionAck = 0x0305, // updated 5.58
     UpdateInventorySlot = 0x0200, // updated 5.58
@@ -216,19 +235,24 @@ namespace Sapphire::Network::Packets
     MSQTrackerComplete = 0x01C1, // updated 5.58
     MSQTrackerProgress = 0xF1CD, // updated 4.5 ? this actually looks like the two opcodes have been combined, see #474
 
-    QuestMessage = 0x0128, // updated 5.58
+    QuestMessage = 0x0399, // updated 5.55 hotfix
 
     QuestTracker = 0x038E, // updated 5.58
+
+    GathererGuide = 0x0238, // updated 5.58
+    GathererGuideViewedMask = 0x0201, // updated 5.58
+    CrafterGuide = 0x0388, // updated 5.58
+    CrafterGuideViewedMask = 0x00F3, // updated 5.58
 
     Mount = 0x03C2, // updated 5.58
 
     DirectorVars = 0x01ED, // updated 5.58
-    SomeDirectorUnk1 = 0x0084, // updated 5.18
-    SomeDirectorUnk2 = 0xF0C1, // updated 5.18
-    SomeDirectorUnk4 = 0x01BD, // updated 5.58
-    SomeDirectorUnk8 = 0x028A, // updated 5.18
-    SomeDirectorUnk16 = 0x028C, // updated 5.18
-    DirectorPopUp = 0x02E3, // updated 5.58
+    DirectorMessage = 0x01BD, // updated 5.58 - display "LogMessages" with an optional director
+    DirectorMessage4 = 0x00D0, // updated 5.58
+    DirectorMessage8 = 0x0228, // updated 5.58
+    DirectorMessage16 = 0x029D, // updated 5.58
+    DirectorMessage32 = 0x0154, // updated 5.58
+    DirectorPopUp = 0x02E3, // updated 5.58 - display dialogue pop-ups in duties and FATEs, for example, Teraflare's countdown
     DirectorPopUp4 = 0x01DC, // updated 5.58
     DirectorPopUp8 = 0x011D, // updated 5.58
 
@@ -246,6 +270,7 @@ namespace Sapphire::Network::Packets
     ShopMessage = 0x00D0, // updated 5.58
     LootMessage = 0x038C, // updated 5.58
     ResultDialog = 0x00DF, // updated 5.58
+    DesynthStats = 0x02DE, // updated 5.58
     DesynthResult = 0x038F, // updated 5.58
 
     /// Housing //////////////////////////////////////
@@ -287,12 +312,14 @@ namespace Sapphire::Network::Packets
     DailyQuests = 0x0331, // updated 5.58
     DailyQuestRepeatFlags = 0x01D1, // updated 5.58
 
+    DailyQuestFinish = 0x0389, // updatetd 5.58
+
     /// Doman Mahjong //////////////////////////////////////
     MahjongOpenGui = 0x02A4, // only available in mahjong instance
     MahjongNextRound = 0x02BD, // initial hands(baipai), # of riichi(wat), winds, honba, score and stuff
     MahjongPlayerAction = 0x02BE, // tsumo(as in drawing a tile) called chi/pon/kan/riichi
     MahjongEndRoundTsumo = 0x02BF, // called tsumo
-    MahjongEndRoundRon = 0x2C0, // called ron or double ron (waiting for action must be flagged from discard packet to call)
+    MahjongEndRoundRon = 0x02C0, // called ron or double ron (waiting for action must be flagged from discard packet to call)
     MahjongTileDiscard = 0x02C1, // giri (discarding a tile.) chi(1)/pon(2)/kan(4)/ron(8) flags etc..
     MahjongPlayersInfo = 0xF2C2, // actor id, name, rating and stuff..
     // 2C3 and 2C4 are currently unknown
@@ -308,6 +335,9 @@ namespace Sapphire::Network::Packets
     SubmarineProgressionStatus = 0x0377, // updated 5.58
     SubmarineStatusList = 0x0338, // updated 5.58
     SubmarineTimers = 0x0292, // updated 5.58
+
+    PlaceFieldMarkerPreset = 0x03B0, // updated 5.58
+    PlaceFieldMarker = 0x011A, // updated 5.58
   };
 
   /**
@@ -346,15 +376,27 @@ namespace Sapphire::Network::Packets
     ReqSearchInfoHandler = 0x0255, // updated 5.58
     ReqExamineSearchCommentHandler = 0x00E7, // updated 5.0
 
+    ReqAddPlayerToBlacklist = 0x0068, //updated 5.58
     ReqRemovePlayerFromBlacklist = 0x015A, // updated 5.58
     BlackListHandler = 0x02C5, // updated 5.58
     PlayerSearchHandler = 0x0259, // updated 5.58
 
+    ReqCWFriendsHandler = 0x02BD, // updated 5.58
+    ReqRefreshCWFriendHandler = 0x023C, // updated 5.58
+
     LinkshellListHandler = 0x01F0, // updated 5.58
+    CWLinkshellListHandler = 0x0283, // updated 5.58
+    FellowshipListHandler = 0x0253, // updated 5.58
+
+    CWLinkshellMemberListHandler = 0x00ED, // updated 5.58
 
     MarketBoardRequestItemListingInfo = 0x02D3, // updated 5.58
     MarketBoardRequestItemListings = 0x00AD, // updated 5.58
     MarketBoardSearch = 0x00D6, // updated 5.58
+    MarketBoardPurchaseHandler = 0x00BD, // updated 5.58
+
+    ReqRetainerList = 0x0197, // updated 5.58
+    ReqRetainerSaleHistory = 0x01CC, // updated 5.58
 
     ReqExamineFcInfo = 0x0359, // updated 5.58
 
@@ -373,8 +415,8 @@ namespace Sapphire::Network::Packets
     ClientTrigger = 0x008B, // updated 5.58
     DiscoveryHandler = 0x01B4, // updated 5.58
 
-    PlaceFieldMarkerPreset = 0x03B0, // updated 5.58
-    PlaceFieldMarker = 0x011A, // updated 5.58
+    PlaceFieldMarkerPresetHandler = 0x00CA, // updated 5.58
+    PlaceFieldMarkerHandler = 0x0392, // updated 5.45 hotfix
     SkillHandler = 0x0175, // updated 5.58
     GMCommand1 = 0x0353, // updated 5.58
     GMCommand2 = 0x03E7, // updated 5.58
@@ -383,7 +425,7 @@ namespace Sapphire::Network::Packets
     UpdatePositionHandler = 0x0212, // updated 5.58
 
     InventoryModifyHandler = 0x014A, // updated 5.58
-    
+	
     InventoryEquipRecommendedItems = 0x01D7, // updated 5.58
 
     ReqPlaceHousingItem = 0x0354, // updated 5.58
@@ -398,7 +440,7 @@ namespace Sapphire::Network::Packets
     EventYieldHandler = 0x03A2, // updated 5.58
     ReturnEventHandler = 0x0333, // updated 5.58
     TradeReturnEventHandler = 0x0179, // updated 5.58
-    TradeReturnEventHandler2 = 0x0169, // updated 5.55 hotfix
+    TradeReturnEventHandler2 = 0x02E1, // updated 5.58
 
     LinkshellEventHandler = 0x016B, // updated 4.5
     LinkshellEventHandler1 = 0x016C, // updated 4.5

@@ -62,7 +62,7 @@ namespace Sapphire::World::Manager
     /*!
      * @brief Maps container IDs to their relevant ItemContainerPtr
      */
-    using ContainerIdToContainerMap = std::unordered_map< uint16_t, ItemContainerPtr >;
+    using ContainerIdToContainerMap = std::unordered_map< Common::InventoryType, ItemContainerPtr >;
     /*!
      * @brief Maps land idents to a container containing ItemContainerPtrs
      */
@@ -114,7 +114,7 @@ namespace Sapphire::World::Manager
      *
      * This enforces permissions on the inventory too so random players can't request an estates items
      */
-    void sendEstateInventory( Entity::Player& player, uint16_t inventoryType, uint8_t plotNum );
+    void sendEstateInventory( Entity::Player& player, Common::InventoryType inventoryType, uint8_t plotNum );
 
     /*!
      * @brief Sends all the available internal inventories in one go. Used to initially populate the menu.
@@ -155,10 +155,10 @@ namespace Sapphire::World::Manager
      */
     bool initHouseModels( Entity::Player& player, LandPtr land, uint32_t presetCatalogId );
 
-    void reqPlaceHousingItem( Entity::Player& player, uint16_t landId, uint16_t containerId, uint8_t slotId,
+    void reqPlaceHousingItem( Entity::Player& player, uint16_t landId, Common::InventoryType containerId, uint8_t slotId,
                               Common::FFXIVARR_POSITION3 pos, float rotation );
 
-    void reqPlaceItemInStore( Entity::Player& player, uint16_t landId, uint16_t containerId, uint8_t slotId );
+    void reqPlaceItemInStore( Entity::Player& player, uint16_t landId, Common::InventoryType containerId, uint8_t slotId );
 
     /*!
      * @brief Returns the equivalent YardObject for a HousingItem
@@ -173,7 +173,7 @@ namespace Sapphire::World::Manager
 
 
     void reqRemoveHousingItem( Sapphire::Entity::Player& player, uint16_t plot,
-                               uint16_t containerId, uint8_t slot, bool sendToStoreroom );
+                               Common::InventoryType containerId, uint8_t slot, bool sendToStoreroom );
 
     void reqEstateExteriorRemodel( Entity::Player& player, uint16_t plot );
 
@@ -201,7 +201,7 @@ namespace Sapphire::World::Manager
      * @return
      */
     bool removeInternalItem( Entity::Player& player, Territory::Housing::HousingInteriorTerritory& terri,
-                             uint16_t containerId, uint16_t slotId, bool sendToStoreroom );
+                             Common::InventoryType containerId, uint16_t slotId, bool sendToStoreroom );
 
     /*!
      *

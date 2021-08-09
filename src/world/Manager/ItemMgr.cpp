@@ -9,31 +9,31 @@
 #include <Database/DatabaseDef.h>
 #include <Service.h>
 
-bool Sapphire::World::Manager::ItemMgr::isArmory( uint16_t containerId )
+bool Sapphire::World::Manager::ItemMgr::isArmory( Common::InventoryType containerId )
 {
   return
-    containerId == Common::ArmoryBody ||
-    containerId == Common::ArmoryEar ||
-    containerId == Common::ArmoryFeet ||
-    containerId == Common::ArmoryHand ||
-    containerId == Common::ArmoryHead ||
-    containerId == Common::ArmoryLegs ||
-    containerId == Common::ArmoryMain ||
-    containerId == Common::ArmoryOff ||
-    containerId == Common::ArmoryRing ||
-    containerId == Common::ArmoryWaist ||
-    containerId == Common::ArmoryWrist ||
-    containerId == Common::ArmorySoulCrystal;
+    containerId == Common::InventoryType::ArmoryBody ||
+    containerId == Common::InventoryType::ArmoryEar ||
+    containerId == Common::InventoryType::ArmoryFeet ||
+    containerId == Common::InventoryType::ArmoryHand ||
+    containerId == Common::InventoryType::ArmoryHead ||
+    containerId == Common::InventoryType::ArmoryLegs ||
+    containerId == Common::InventoryType::ArmoryMain ||
+    containerId == Common::InventoryType::ArmoryOff ||
+    containerId == Common::InventoryType::ArmoryRing ||
+    containerId == Common::InventoryType::ArmoryWaist ||
+    containerId == Common::InventoryType::ArmoryWrist ||
+    containerId == Common::InventoryType::ArmorySoulCrystal;
 }
 
 
-uint16_t Sapphire::World::Manager::ItemMgr::getCharaEquipSlotCategoryToArmoryId( Common::EquipSlotCategory slot )
+Sapphire::Common::InventoryType Sapphire::World::Manager::ItemMgr::getCharaEquipSlotCategoryToArmoryId( Common::EquipSlotCategory slot )
 {
 
   switch( slot )
   {
     case Common::EquipSlotCategory::Head:
-      return Common::ArmoryHead;
+      return Common::InventoryType::ArmoryHead;
 
     case Common::EquipSlotCategory::Body:
     case Common::EquipSlotCategory::BodyDisallowHead:
@@ -41,53 +41,53 @@ uint16_t Sapphire::World::Manager::ItemMgr::getCharaEquipSlotCategoryToArmoryId(
     case Common::EquipSlotCategory::BodyDisallowAll:
     case Common::EquipSlotCategory::BodyDisallowHands:
     case Common::EquipSlotCategory::BodyDisallowLegsFeet:
-      return Common::ArmoryBody;
+      return Common::InventoryType::ArmoryBody;
 
     case Common::EquipSlotCategory::Ears:
-      return Common::ArmoryEar;
+      return Common::InventoryType::ArmoryEar;
 
     case Common::EquipSlotCategory::Feet:
-      return Common::ArmoryFeet;
+      return Common::InventoryType::ArmoryFeet;
 
     case Common::EquipSlotCategory::Hands:
-      return Common::ArmoryHand;
+      return Common::InventoryType::ArmoryHand;
 
     case Common::EquipSlotCategory::Legs:
     case Common::EquipSlotCategory::LegsDisallowFeet:
-      return Common::ArmoryLegs;
+      return Common::InventoryType::ArmoryLegs;
 
     case Common::EquipSlotCategory::MainHand:
     case Common::EquipSlotCategory::MainTwoHandedWeapon:
     //case Common::EquipSlotCategory::MainOrOffHand:
-      return Common::ArmoryMain;
+      return Common::InventoryType::ArmoryMain;
 
     case Common::EquipSlotCategory::OffHand:
-      return Common::ArmoryOff;
+      return Common::InventoryType::ArmoryOff;
 
     case Common::EquipSlotCategory::Ring:
-      return Common::ArmoryRing;
+      return Common::InventoryType::ArmoryRing;
 
     case Common::EquipSlotCategory::Waist:
-      return Common::ArmoryWaist;
+      return Common::InventoryType::ArmoryWaist;
 
     case Common::EquipSlotCategory::Wrist:
-      return Common::ArmoryWrist;
+      return Common::InventoryType::ArmoryWrist;
 
     case Common::EquipSlotCategory::Neck:
-      return Common::ArmoryNeck;
+      return Common::InventoryType::ArmoryNeck;
 
     case Common::EquipSlotCategory::SoulCrystal:
-      return Common::ArmorySoulCrystal;
+      return Common::InventoryType::ArmorySoulCrystal;
 
     default:
-      return 0;
+      return Common::InventoryType::Bag0;
   }
 }
 
 
-bool Sapphire::World::Manager::ItemMgr::isEquipment( uint16_t containerId )
+bool Sapphire::World::Manager::ItemMgr::isEquipment( Common::InventoryType containerId )
 {
-  return containerId == Common::GearSet0;
+  return containerId == Common::InventoryType::GearSet0;
 }
 
 bool Sapphire::World::Manager::ItemMgr::isOneHandedWeapon( Common::ItemUICategory weaponCategory )
@@ -150,22 +150,21 @@ Sapphire::ItemPtr Sapphire::World::Manager::ItemMgr::loadItem( uint64_t uId )
   }
 }
 
-
-Sapphire::Common::ContainerType Sapphire::World::Manager::ItemMgr::getContainerType( uint32_t containerId )
+Sapphire::Common::ContainerType Sapphire::World::Manager::ItemMgr::getContainerType( Common::InventoryType containerId )
 {
-  if( containerId < 5 )
+  if( containerId <= Common::InventoryType::Bag3 )
   {
     return Common::Bag;
   }
-  else if( containerId < 2000 )
+  else if( containerId <= Common::InventoryType::GearSet1 )
   {
     return Common::GearSet;
   }
-  else if( containerId < 3200 )
+  else if( containerId <= Common::InventoryType::Crystal )
   {
     return Common::CurrencyCrystal;
   }
-  else if( containerId < 3600 )
+  else if( containerId <= Common::InventoryType::ArmoryMain )
   {
     return Common::Armory;
   }

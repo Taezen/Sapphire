@@ -17,7 +17,10 @@
 #include "Territory/Territory.h"
 #include "Inventory/Item.h"
 #include "Inventory/ItemContainer.h"
+#include "Inventory/CurrencyCrystal.h"
+#include "Inventory/CurrencyCrystalContainer.h"
 #include "Manager/ItemMgr.h"
+#include "Manager/CurrencyCrystalMgr.h"
 
 #include "ServerMgr.h"
 
@@ -206,6 +209,7 @@ bool Sapphire::Entity::Player::load( uint32_t charId, World::SessionPtr pSession
     Logger::error( "Player #{0}  data corrupt!", char_id_str );
 
   initInventory();
+  initCurrencyCrystal();
   calculateStats();
 
   // Stats
@@ -450,7 +454,7 @@ void Sapphire::Entity::Player::updateSql()
 
   std::vector< uint8_t > orchestrionVec( sizeof( m_orchestrion ) );
   memcpy( orchestrionVec.data(), m_orchestrion, sizeof( m_orchestrion ) );
-  stmt->setBinary( 42, mountsVec );
+  stmt->setBinary( 43, orchestrionVec );
 
   stmt->setInt( 44, 0 ); // EquippedMannequin
 
@@ -659,6 +663,14 @@ void Sapphire::Entity::Player::writeItemDb( Sapphire::ItemPtr pItem ) const
   }
 }
 
+void Sapphire::Entity::Player::writeCurrencyCrystalDb( std::string& tableName ) const
+{
+  auto& db = Common::Service< Db::DbWorkerPool< Db::ZoneDbConnection > >::ref();
+
+  std::string sql = "INSERT INTO " + tableName + " ( CharacterId ) VALUES( " + std::to_string(getId()) + " ); ";
+  db.directExecute(sql);
+}
+
 bool Sapphire::Entity::Player::loadInventory()
 {
   auto& itemMgr = Common::Service< World::Manager::ItemMgr >::ref();
@@ -670,12 +682,12 @@ bool Sapphire::Entity::Player::loadInventory()
                          "container_8, container_9, container_10, container_11, "
                          "container_12, container_13 "
                          "FROM charaitemgearset " \
-                               "WHERE CharacterId =  " + std::to_string( getId() ) + " " \
+                               "WHERE CharacterId = " + std::to_string( getId() ) + " " \
                                "ORDER BY storageId ASC;" );
 
   while( res->next() )
   {
-    uint16_t storageId = res->getUInt16( 1 );
+    InventoryType storageId = static_cast< InventoryType >( res->getUInt16( 1 ) );
 
     for( uint32_t i = 1; i <= 14; i++ )
     {
@@ -704,12 +716,12 @@ bool Sapphire::Entity::Player::loadInventory()
                             "container_25, container_26, container_27, container_28, container_29, "
                             "container_30, container_31, container_32, container_33, container_34 "
                             "FROM charaiteminventory " \
-                                  "WHERE CharacterId =  " + std::to_string( getId() ) + " " \
+                                  "WHERE CharacterId = " + std::to_string( getId() ) + " " \
                                   "ORDER BY storageId ASC;" );
 
   while( bagRes->next() )
   {
-    uint16_t storageId = bagRes->getUInt16( 1 );
+    InventoryType storageId = static_cast< InventoryType >( bagRes->getUInt16( 1 ) );
     for( uint32_t i = 1; i <= m_storageMap[ storageId ]->getMaxSize(); i++ )
     {
       uint64_t uItemId = bagRes->getUInt64( i + 1 );
@@ -722,6 +734,107 @@ bool Sapphire::Entity::Player::loadInventory()
         continue;
 
       m_storageMap[ storageId ]->getItemMap()[ i - 1 ] = pItem;
+    }
+  }
+
+  return true;
+}
+
+bool Sapphire::Entity::Player::loadCurrency()
+{
+  auto& currencyCrystalMgr = Common::Service< World::Manager::CurrencyCrystalMgr >::ref();
+  auto& db = Common::Service< Db::DbWorkerPool< Db::ZoneDbConnection > >::ref();
+
+  auto currency = db.query( "SELECT storageId, "
+                            "container_0, container_1, container_2, container_3, container_4, "
+                            "container_5, container_6, container_7, container_8, container_9, "
+                            "container_10, container_11 "
+                            "FROM charaitemcurrency " \
+                            "WHERE CharacterId = " + std::to_string(getId()) + " " \
+                            "ORDER BY storageId ASC;" );
+
+  while ( currency->next() )
+  {
+    InventoryType storageId = static_cast< InventoryType >( currency->getUInt16( 1 ) );
+    for ( uint32_t i = 0; i < m_currencyCrystalMap[ storageId ]->getMaxSize(); i++ )
+    {
+      uint64_t uquantity = currency->getUInt64( i + 2 );
+      if (uquantity == 0 )
+        continue;
+
+      CurrencyCrystalPtr pCurrencyCrystal = currencyCrystalMgr.loadCurrency( i, uquantity );
+
+      if ( pCurrencyCrystal == nullptr )
+        continue;
+
+      m_currencyCrystalMap[ storageId ]->getCurrencyCrystalMap()[ i ] = pCurrencyCrystal;
+    }
+  }
+
+  return true;
+}
+
+bool Sapphire::Entity::Player::loadCrystal()
+{
+  auto& currencyCrystalMgr = Common::Service< World::Manager::CurrencyCrystalMgr >::ref();
+  auto& db = Common::Service< Db::DbWorkerPool< Db::ZoneDbConnection > >::ref();
+
+  auto crystal = db.query( "SELECT storageId, "
+                           "container_0, container_1, container_2, container_3, container_4, "
+                           "container_5, container_6, container_7, container_8, container_9, "
+                           "container_10, container_11, container_12, container_13, container_14, "
+                           "container_15, container_16, container_17 "
+                           "FROM charaitemcrystal " \
+                           "WHERE CharacterId = " + std::to_string(getId()) + " " \
+                           "ORDER BY storageId ASC;" );
+
+  while (crystal->next() )
+  {
+    InventoryType storageId = static_cast< InventoryType >( crystal->getUInt16( 1 ) );
+    for ( uint32_t i = 0; i < m_currencyCrystalMap[ storageId ]->getMaxSize(); i++ )
+    {
+      uint64_t uquantity = crystal->getUInt64( i + 2 );
+      if (uquantity == 0 )
+        continue;
+
+      CurrencyCrystalPtr pCurrencyCrystal = currencyCrystalMgr.loadCrystal( i, uquantity );
+
+      if ( pCurrencyCrystal == nullptr )
+        continue;
+
+      m_currencyCrystalMap[ storageId ]->getCurrencyCrystalMap()[ i ] = pCurrencyCrystal;
+    }
+  }
+
+  return true;
+}
+
+bool Sapphire::Entity::Player::loadExtraCurrency()
+{
+  auto& currencyCrystalMgr = Common::Service< World::Manager::CurrencyCrystalMgr >::ref();
+  auto& db = Common::Service< Db::DbWorkerPool< Db::ZoneDbConnection > >::ref();
+
+  auto extraCurrency = db.query( "SELECT Currency_0, Currency_1, Currency_2, Currency_3, Currency_4, "
+                           "Currency_5, Currency_6, Currency_7, Currency_8, Currency_9, "
+                           "Currency_10, Currency_11, Currency_12, Currency_13, Currency_14, "
+                           "Currency_15, Currency_16, Currency_17, Currency_18, Currency_19, "
+                           "Currency_20, Currency_21, Currency_22, Currency_23, Currency_24, "
+                           "Currency_25, Currency_26, Currency_27, Currency_28 "
+                           "FROM charaextracurrency " \
+                           "WHERE CharacterId = " + std::to_string( getId() ) );
+
+  while ( extraCurrency->next() )
+  {
+    for ( uint32_t i = 0; i < m_currencyCrystalMap[ InventoryType::ExtraCurrency ]->getMaxSize(); i++ )
+    {
+      uint64_t uquantity = extraCurrency->getUInt64( i + 1 );
+
+      CurrencyCrystalPtr pCurrencyCrystal = currencyCrystalMgr.loadExtraCurrency( i, uquantity );
+
+      if ( pCurrencyCrystal == nullptr )
+        continue;
+
+      m_currencyCrystalMap[ InventoryType::ExtraCurrency ]->getCurrencyCrystalMap()[ i ] = pCurrencyCrystal;
     }
   }
 

@@ -23,7 +23,7 @@ namespace Sapphire::World::Territory::Housing
     const Common::LandIdent getLandIdent() const;
 
     void updateHousingObjects();
-    void spawnHousingObject( uint8_t containerIdx, uint16_t slot, uint16_t containerType,
+    void spawnHousingObject( uint8_t containerIdx, uint16_t slot, Common::InventoryType containerType,
                              Inventory::HousingItemPtr item );
     void updateHousingObjectPosition(
       Entity::Player& sourcePlayer, uint16_t slot, Sapphire::Common::FFXIVARR_POSITION3 pos, uint16_t rot );

@@ -25,34 +25,19 @@ void Sapphire::World::Manager::InventoryMgr::sendInventoryContainer( Sapphire::E
     if( !itM->second )
       return;
 
-    if( container->getId() == Common::InventoryType::Currency || container->getId() == Common::InventoryType::Crystal )
-    {
-      auto currencyInfoPacket = makeZonePacket< Server::FFXIVIpcCurrencyCrystalInfo >( player.getId() );
-      currencyInfoPacket->data().containerSequence = sequence;
-      currencyInfoPacket->data().catalogId = itM->second->getId();
-      currencyInfoPacket->data().unknown = 1;
-      currencyInfoPacket->data().quantity = itM->second->getStackSize();
-      currencyInfoPacket->data().containerId = container->getId();
-      currencyInfoPacket->data().slot = 0;
+    auto itemInfoPacket = makeZonePacket< Server::FFXIVIpcItemInfo >( player.getId() );
+    itemInfoPacket->data().containerSequence = sequence;
+    itemInfoPacket->data().containerId = container->getId();
+    itemInfoPacket->data().slot = itM->first;
+    itemInfoPacket->data().quantity = itM->second->getStackSize();
+    itemInfoPacket->data().catalogId = itM->second->getId();
+    itemInfoPacket->data().condition = itM->second->getDurability();
+    itemInfoPacket->data().spiritBond = itM->second->getSpiritbond();
+    itemInfoPacket->data().reservedFlag = itM->second->getReservedFlag();
+    itemInfoPacket->data().hqFlag = static_cast< uint8_t >( itM->second->isHq() ? 1 : 0 );
+    itemInfoPacket->data().stain = itM->second->getStain();
 
-      player.queuePacket( currencyInfoPacket );
-    }
-    else
-    {
-      auto itemInfoPacket = makeZonePacket< Server::FFXIVIpcItemInfo >( player.getId() );
-      itemInfoPacket->data().containerSequence = sequence;
-      itemInfoPacket->data().containerId = container->getId();
-      itemInfoPacket->data().slot = itM->first;
-      itemInfoPacket->data().quantity = itM->second->getStackSize();
-      itemInfoPacket->data().catalogId = itM->second->getId();
-      itemInfoPacket->data().condition = itM->second->getDurability();
-      itemInfoPacket->data().spiritBond = itM->second->getSpiritbond();
-      itemInfoPacket->data().reservedFlag = itM->second->getReservedFlag();
-      itemInfoPacket->data().hqFlag = static_cast< uint8_t >( itM->second->isHq() ? 1 : 0 );
-      itemInfoPacket->data().stain = itM->second->getStain();
-
-      player.queuePacket( itemInfoPacket );
-    }
+    player.queuePacket( itemInfoPacket );
   }
 
   auto containerInfoPacket = makeZonePacket< Server::FFXIVIpcContainerInfo >( player.getId() );
@@ -94,7 +79,7 @@ void Sapphire::World::Manager::InventoryMgr::saveHousingContainer( Common::LandI
 }
 
 void Sapphire::World::Manager::InventoryMgr::removeItemFromHousingContainer( Sapphire::Common::LandIdent ident,
-                                                                             uint16_t containerId,
+                                                                             Common::InventoryType containerId,
                                                                              uint16_t slotId )
 {
   auto& db = Common::Service< Db::DbWorkerPool< Db::ZoneDbConnection > >::ref();
@@ -104,14 +89,14 @@ void Sapphire::World::Manager::InventoryMgr::removeItemFromHousingContainer( Sap
   auto u64ident = *reinterpret_cast< uint64_t* >( &ident );
 
   stmt->setUInt64( 1, u64ident );
-  stmt->setUInt( 2, containerId );
+  stmt->setUInt( 2, static_cast< uint16_t >( containerId ) );
   stmt->setUInt( 3, slotId );
 
   db.directExecute( stmt );
 }
 
 void Sapphire::World::Manager::InventoryMgr::saveHousingContainerItem( uint64_t ident,
-                                                                       uint16_t containerId, uint16_t slotId,
+                                                                       Common::InventoryType containerId, uint16_t slotId,
                                                                        uint64_t itemId )
 {
   auto& db = Common::Service< Db::DbWorkerPool< Db::ZoneDbConnection > >::ref();
@@ -120,7 +105,7 @@ void Sapphire::World::Manager::InventoryMgr::saveHousingContainerItem( uint64_t 
   // LandIdent, ContainerId, SlotId, ItemId, ItemId
 
   stmt->setUInt64( 1, ident );
-  stmt->setUInt( 2, containerId );
+  stmt->setUInt( 2, static_cast< uint16_t >( containerId ) );
   stmt->setUInt( 3, slotId );
   stmt->setUInt64( 4, itemId );
 

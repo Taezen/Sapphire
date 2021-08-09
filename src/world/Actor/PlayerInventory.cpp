@@ -44,62 +44,56 @@ void Sapphire::Entity::Player::initInventory()
   { m_storageMap[ type ] = make_ItemContainer( type, maxSize, tableName, isMultiStorage, isPersistentStorage ); };
 
   // main bags
-  setupContainer( Bag0, 34, "charaiteminventory", true );
-  setupContainer( Bag1, 34, "charaiteminventory", true );
-  setupContainer( Bag2, 34, "charaiteminventory", true );
-  setupContainer( Bag3, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::Bag0, 35, "charaiteminventory", true );
+  setupContainer( InventoryType::Bag1, 35, "charaiteminventory", true );
+  setupContainer( InventoryType::Bag2, 35, "charaiteminventory", true );
+  setupContainer( InventoryType::Bag3, 35, "charaiteminventory", true );
 
   // gear set
-  setupContainer( GearSet0, 13, "charaitemgearset", true );
-
-  // gil contianer
-  setupContainer( Currency, 11, "charaiteminventory", true );
-
-  // crystals??
-  setupContainer( Crystal, 11, "charaiteminventory", true );
+  setupContainer( InventoryType::GearSet0, 14, "charaitemgearset", true );
 
   // armory weapons - 0
-  setupContainer( ArmoryMain, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryMain, 35, "charaiteminventory", true );
 
   // armory offhand - 1
-  setupContainer( ArmoryOff, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryOff, 35, "charaiteminventory", true );
 
   //armory head - 2
-  setupContainer( ArmoryHead, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryHead, 35, "charaiteminventory", true );
 
   //armory body - 3
-  setupContainer( ArmoryBody, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryBody, 35, "charaiteminventory", true );
 
   //armory hand - 4
-  setupContainer( ArmoryHand, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryHand, 35, "charaiteminventory", true );
 
   //armory waist - 5
-  setupContainer( ArmoryWaist, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryWaist, 35, "charaiteminventory", true );
 
   //armory legs - 6
-  setupContainer( ArmoryLegs, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryLegs, 35, "charaiteminventory", true );
 
   //armory feet - 7
-  setupContainer( ArmoryFeet, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryFeet, 35, "charaiteminventory", true );
 
   //neck
-  setupContainer( ArmoryNeck, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryNeck, 35, "charaiteminventory", true );
 
   //earring
-  setupContainer( ArmoryEar, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryEar, 35, "charaiteminventory", true );
 
   //wrist
-  setupContainer( ArmoryWrist, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryWrist, 35, "charaiteminventory", true );
 
   //armory rings - 11
-  setupContainer( ArmoryRing, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmoryRing, 35, "charaiteminventory", true );
 
   //soul crystals - 13
-  setupContainer( ArmorySoulCrystal, 34, "charaiteminventory", true );
+  setupContainer( InventoryType::ArmorySoulCrystal, 35, "charaiteminventory", true );
 
   // item hand in container
   // non-persistent container, will not save its contents
-  setupContainer( HandIn, 10, "", true, false );
+  setupContainer( InventoryType::HandIn, 10, "", true, false );
 
   loadInventory();
 
@@ -297,149 +291,40 @@ void Sapphire::Entity::Player::unequipSoulCrystal( ItemPtr pItem )
   setClassJob( parentClass );
 }
 
-// TODO: these next functions are so similar that they could likely be simplified
-void Sapphire::Entity::Player::addCurrency( CurrencyType type, uint32_t amount, bool sendLootMessage )
-{
-  auto slot = static_cast< uint8_t >( static_cast< uint8_t >( type ) - 1 );
-  auto currItem = m_storageMap[ Currency ]->getItem( slot );
-
-  if( !currItem )
-  {
-    // TODO: map currency type to itemid
-    currItem = createTempItem( 1 );
-    m_storageMap[ Currency ]->setItem( slot, currItem );
-  }
-
-  uint32_t currentAmount = currItem->getStackSize();
-  currItem->setStackSize( currentAmount + amount );
-  updateItemDb( currItem );
-
-  updateContainer( Currency, slot, currItem );
-
-  auto invUpdate = std::make_shared< UpdateInventorySlotPacket >( getId(),
-                                                                    static_cast< uint8_t >( type ) - 1,
-                                                                    Common::InventoryType::Currency,
-                                                                    *currItem );
-  queuePacket( invUpdate );
-
-
-  if( sendLootMessage )
-  {
-    switch( type )
-    {
-      case CurrencyType::Gil:
-      {
-        auto lootMsg = makeZonePacket< FFXIVIpcLootMessage >( getId() );
-        lootMsg->data().msgType = Common::LootMessageType::GetGil;
-        lootMsg->data().param1 = amount;
-        queuePacket( lootMsg );
-        break;
-      }
-    }
-  }
-}
-
-void Sapphire::Entity::Player::removeCurrency( Common::CurrencyType type, uint32_t amount )
-{
-
-  auto currItem = m_storageMap[ Currency ]->getItem( static_cast< uint8_t >( type ) - 1 );
-
-  if( !currItem )
-    return;
-
-  uint32_t currentAmount = currItem->getStackSize();
-  if( amount > currentAmount )
-    currItem->setStackSize( 0 );
-  else
-    currItem->setStackSize( currentAmount - amount );
-  updateItemDb( currItem );
-
-  auto invUpdate = std::make_shared< UpdateInventorySlotPacket >( getId(),
-                                                                    static_cast< uint8_t >( type ) - 1,
-                                                                    Common::InventoryType::Currency,
-                                                                    *currItem );
-  queuePacket( invUpdate );
-}
-
-
-void Sapphire::Entity::Player::addCrystal( Common::CrystalType type, uint32_t amount, bool sendLootMessage )
-{
-  auto currItem = m_storageMap[ Crystal ]->getItem( static_cast< uint8_t >( type ) - 1 );
-
-  if( !currItem )
-  {
-    // TODO: map currency type to itemid
-    currItem = createTempItem( static_cast< uint8_t >( type ) + 1 );
-    m_storageMap[ Crystal ]->setItem( static_cast< uint8_t >( type ) - 1, currItem );
-  }
-
-  uint32_t currentAmount = currItem->getStackSize();
-
-  currItem->setStackSize( currentAmount + amount );
-
-  updateItemDb( currItem );
-
-  writeInventory( Crystal );
-
-
-  auto invUpdate = std::make_shared< UpdateInventorySlotPacket >( getId(),
-                                                                    static_cast< uint8_t >( type ) - 1,
-                                                                    Common::InventoryType::Crystal,
-                                                                    *currItem );
-  queuePacket( invUpdate );
-
-  if( sendLootMessage )
-  {
-    auto lootMsg = makeZonePacket< FFXIVIpcLootMessage >( getId() );
-    lootMsg->data().msgType = Common::LootMessageType::GetItem2;
-    lootMsg->data().param1 = getId();
-    lootMsg->data().param2 = currItem->getId();
-    lootMsg->data().param3 = amount;
-    queuePacket( lootMsg );
-  }
-
-  auto soundEffectPacket = makeZonePacket< FFXIVIpcInventoryActionAck >( getId() );
-  soundEffectPacket->data().sequence = 0xFFFFFFFF;
-  soundEffectPacket->data().type = 6;
-  queuePacket( soundEffectPacket );
-}
-
-void Sapphire::Entity::Player::removeCrystal( Common::CrystalType type, uint32_t amount )
-{
-  auto currItem = m_storageMap[ Crystal ]->getItem( static_cast< uint8_t >( type ) - 1 );
-
-  if( !currItem )
-    return;
-
-  uint32_t currentAmount = currItem->getStackSize();
-  if( amount > currentAmount )
-    currItem->setStackSize( 0 );
-  else
-    currItem->setStackSize( currentAmount - amount );
-
-  updateItemDb( currItem );
-
-  auto invUpdate = std::make_shared< UpdateInventorySlotPacket >( getId(),
-                                                                    static_cast< uint8_t >( type ) - 1,
-                                                                    Common::InventoryType::Crystal,
-                                                                    *currItem );
-  queuePacket( invUpdate );
-}
-
 void Sapphire::Entity::Player::sendInventory()
 {
   auto& invMgr = Common::Service< World::Manager::InventoryMgr >::ref();
 
-  for( auto it = m_storageMap.begin(); it != m_storageMap.end(); ++it )
-  {
-    invMgr.sendInventoryContainer( *this, it->second );
-  }
+  sendExtraCurrency();
+
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::Bag0 ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::Bag1 ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::Bag2 ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::Bag3 ] );
+  
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::GearSet0 ] );
+
+  sendCurrencyCrystal();
+
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryMain ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryOff ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryHead ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryBody ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryHand ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryWaist ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryLegs ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryFeet ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryEar ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryNeck ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryWrist ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmoryRing ] );
+  invMgr.sendInventoryContainer( *this, m_storageMap[ InventoryType::ArmorySoulCrystal ] );
 }
 
 Sapphire::Entity::Player::InvSlotPairVec Sapphire::Entity::Player::getSlotsOfItemsInInventory( uint32_t catalogId )
 {
   InvSlotPairVec outVec;
-  for( auto i : { Bag0, Bag1, Bag2, Bag3 } )
+  for( auto i : { InventoryType::Bag0, InventoryType::Bag1, InventoryType::Bag2, InventoryType::Bag3 } )
   {
     auto inv = m_storageMap[ i ];
     for( auto item : inv->getItemMap() )
@@ -453,7 +338,7 @@ Sapphire::Entity::Player::InvSlotPairVec Sapphire::Entity::Player::getSlotsOfIte
 
 Sapphire::Entity::Player::InvSlotPair Sapphire::Entity::Player::getFreeBagSlot()
 {
-  for( auto i : { Bag0, Bag1, Bag2, Bag3 } )
+  for( auto i : { InventoryType::Bag0, InventoryType::Bag1, InventoryType::Bag2, InventoryType::Bag3 } )
   {
     auto freeSlot = static_cast< int8_t >( m_storageMap[ i ]->getFreeSlot() );
 
@@ -461,37 +346,12 @@ Sapphire::Entity::Player::InvSlotPair Sapphire::Entity::Player::getFreeBagSlot()
       return std::make_pair( i, freeSlot );
   }
   // no room in inventory
-  return std::make_pair( 0, -1 );
+  return std::make_pair( InventoryType::Bag0, -1 );
 }
 
-Sapphire::ItemPtr Sapphire::Entity::Player::getItemAt( uint16_t containerId, uint8_t slotId )
+Sapphire::ItemPtr Sapphire::Entity::Player::getItemAt( Common::InventoryType containerId, uint8_t slotId )
 {
   return m_storageMap[ containerId ]->getItem( slotId );
-}
-
-
-uint32_t Sapphire::Entity::Player::getCurrency( CurrencyType type )
-{
-
-  auto currItem = m_storageMap[ Currency ]->getItem( static_cast< uint8_t >( type ) - 1 );
-
-  if( !currItem )
-    return 0;
-
-  return currItem->getStackSize();
-
-}
-
-uint32_t Sapphire::Entity::Player::getCrystal( CrystalType type )
-{
-
-  auto currItem = m_storageMap[ Crystal ]->getItem( static_cast< uint8_t >( type ) - 1 );
-
-  if( !currItem )
-    return 0;
-
-  return currItem->getStackSize();
-
 }
 
 void Sapphire::Entity::Player::writeInventory( InventoryType type )
@@ -505,7 +365,7 @@ void Sapphire::Entity::Player::writeInventory( InventoryType type )
 
   std::string query = "UPDATE " + storage->getTableName() + " SET ";
 
-  for( int32_t i = 0; i <= storage->getMaxSize(); i++ )
+  for( int32_t i = 0; i < storage->getMaxSize(); i++ )
   {
     auto currItem = storage->getItem( i );
 
@@ -576,10 +436,10 @@ Sapphire::ItemPtr Sapphire::Entity::Player::addItem( ItemPtr itemToAdd, bool sil
   // used for item obtain notification
   uint32_t originalQuantity = itemToAdd->getStackSize();
 
-  std::pair< uint16_t, uint8_t > freeBagSlot;
+  std::pair< InventoryType, uint8_t > freeBagSlot;
   bool foundFreeSlot = false;
 
-  std::vector< uint16_t > bags = { Bag0, Bag1, Bag2, Bag3 };
+  std::vector< InventoryType > bags = { InventoryType::Bag0, InventoryType::Bag1, InventoryType::Bag2, InventoryType::Bag3 };
   sendDebug( "adding item: {}, equipSlotCategory: {}, stackSize: {}", itemToAdd->getId(), itemInfo->equipSlotCategory, itemInfo->stackSize );
   // add the related armoury bag to the applicable bags and try and fill a free slot there before falling back to regular inventory
   if( itemInfo->equipSlotCategory > 0 && getEquipDisplayFlags() & StoreNewItemsInArmouryChest )
@@ -710,7 +570,7 @@ Sapphire::ItemPtr Sapphire::Entity::Player::addItem( uint32_t catalogId, uint32_
 }
 
 void
-Sapphire::Entity::Player::moveItem( uint16_t fromInventoryId, uint8_t fromSlotId, uint16_t toInventoryId, uint8_t toSlot )
+Sapphire::Entity::Player::moveItem( InventoryType fromInventoryId, uint8_t fromSlotId, InventoryType toInventoryId, uint8_t toSlot )
 {
 
   auto tmpItem = m_storageMap[ fromInventoryId ]->getItem( fromSlotId );
@@ -728,18 +588,18 @@ Sapphire::Entity::Player::moveItem( uint16_t fromInventoryId, uint8_t fromSlotId
   if( fromInventoryId != toInventoryId )
     writeInventory( static_cast< InventoryType >( fromInventoryId ) );
 
-  if( static_cast< InventoryType >( toInventoryId ) == GearSet0 )
+  if( static_cast< InventoryType >( toInventoryId ) == InventoryType::GearSet0 )
     equipItem( static_cast< GearSetSlot >( toSlot ), tmpItem, true );
 
-  if( static_cast< InventoryType >( fromInventoryId ) == GearSet0 )
+  if( static_cast< InventoryType >( fromInventoryId ) == InventoryType::GearSet0 )
     unequipItem( static_cast< GearSetSlot >( fromSlotId ), tmpItem, true );
 
-  if( static_cast< InventoryType >( toInventoryId ) == GearSet0 ||
-      static_cast< InventoryType >( fromInventoryId ) == GearSet0 )
+  if( static_cast< InventoryType >( toInventoryId ) == InventoryType::GearSet0 ||
+      static_cast< InventoryType >( fromInventoryId ) == InventoryType::GearSet0 )
     sendStatusEffectUpdate(); // send if any equip is changed
 }
 
-bool Sapphire::Entity::Player::updateContainer( uint16_t storageId, uint8_t slotId, ItemPtr pItem )
+bool Sapphire::Entity::Player::updateContainer( InventoryType storageId, uint8_t slotId, ItemPtr pItem )
 {
   auto containerType = World::Manager::ItemMgr::getContainerType( storageId );
 
@@ -750,9 +610,8 @@ bool Sapphire::Entity::Player::updateContainer( uint16_t storageId, uint8_t slot
   {
     case Armory:
     case Bag:
-    case CurrencyCrystal:
     {
-      writeInventory( static_cast< InventoryType >( storageId ) );
+      writeInventory( storageId );
       break;
     }
 
@@ -767,7 +626,7 @@ bool Sapphire::Entity::Player::updateContainer( uint16_t storageId, uint8_t slot
       else
         unequipItem( static_cast< GearSetSlot >( slotId ), pItem, true );
 
-      writeInventory( static_cast< InventoryType >( storageId ) );
+      writeInventory( storageId );
       break;
     }
     default:
@@ -777,8 +636,8 @@ bool Sapphire::Entity::Player::updateContainer( uint16_t storageId, uint8_t slot
   return true;
 }
 
-void Sapphire::Entity::Player::splitItem( uint16_t fromInventoryId, uint8_t fromSlotId,
-                                          uint16_t toInventoryId, uint8_t toSlot, uint16_t itemCount )
+void Sapphire::Entity::Player::splitItem( InventoryType fromInventoryId, uint8_t fromSlotId,
+                                          InventoryType toInventoryId, uint8_t toSlot, uint16_t itemCount )
 {
   if( itemCount == 0 )
     return;
@@ -810,8 +669,8 @@ void Sapphire::Entity::Player::splitItem( uint16_t fromInventoryId, uint8_t from
   updateItemDb( fromItem );
 }
 
-void Sapphire::Entity::Player::mergeItem( uint16_t fromInventoryId, uint8_t fromSlotId,
-                                          uint16_t toInventoryId, uint8_t toSlot )
+void Sapphire::Entity::Player::mergeItem( InventoryType fromInventoryId, uint8_t fromSlotId,
+                                          InventoryType toInventoryId, uint8_t toSlot )
 {
   auto fromItem = m_storageMap[ fromInventoryId ]->getItem( fromSlotId );
   auto toItem = m_storageMap[ toInventoryId ]->getItem( toSlot );
@@ -845,8 +704,8 @@ void Sapphire::Entity::Player::mergeItem( uint16_t fromInventoryId, uint8_t from
   updateContainer( toInventoryId, toSlot, toItem );
 }
 
-void Sapphire::Entity::Player::swapItem( uint16_t fromInventoryId, uint8_t fromSlotId,
-                                         uint16_t toInventoryId, uint8_t toSlot )
+void Sapphire::Entity::Player::swapItem( InventoryType fromInventoryId, uint8_t fromSlotId,
+                                         InventoryType toInventoryId, uint8_t toSlot )
 {
   auto fromItem = m_storageMap[ fromInventoryId ]->getItem( fromSlotId );
   auto toItem = m_storageMap[ toInventoryId ]->getItem( toSlot );
@@ -872,12 +731,12 @@ void Sapphire::Entity::Player::swapItem( uint16_t fromInventoryId, uint8_t fromS
   updateContainer( toInventoryId, toSlot, fromItem );
   updateContainer( fromInventoryId, fromSlotId, toItem );
 
-  if( static_cast< InventoryType >( toInventoryId ) == GearSet0 ||
-    static_cast< InventoryType >( fromInventoryId ) == GearSet0 )
+  if( static_cast< InventoryType >( toInventoryId ) == InventoryType::GearSet0 ||
+    static_cast< InventoryType >( fromInventoryId ) == InventoryType::GearSet0 )
     sendStatusEffectUpdate(); // send if any equip is changed
 }
 
-void Sapphire::Entity::Player::discardItem( uint16_t fromInventoryId, uint8_t fromSlotId )
+void Sapphire::Entity::Player::discardItem( InventoryType fromInventoryId, uint8_t fromSlotId )
 {
   // i am not entirely sure how this should be generated or if it even is important for us...
   uint32_t sequence = getNextInventorySequence();
@@ -909,7 +768,7 @@ uint16_t Sapphire::Entity::Player::calculateEquippedGearItemLevel()
 {
   uint32_t iLvlResult = 0;
 
-  auto gearSetMap = m_storageMap[ GearSet0 ]->getItemMap();
+  auto gearSetMap = m_storageMap[ InventoryType::GearSet0 ]->getItemMap();
 
   auto it = gearSetMap.begin();
 
@@ -936,13 +795,13 @@ uint16_t Sapphire::Entity::Player::calculateEquippedGearItemLevel()
 
 Sapphire::ItemPtr Sapphire::Entity::Player::getEquippedWeapon()
 {
-  return m_storageMap[ GearSet0 ]->getItem( GearSetSlot::MainHand );
+  return m_storageMap[ InventoryType::GearSet0 ]->getItem( GearSetSlot::MainHand );
 }
 
 uint8_t Sapphire::Entity::Player::getFreeSlotsInBags()
 {
   uint8_t slots = 0;
-  for( uint8_t container : { Bag0, Bag1, Bag2, Bag3 } )
+  for( InventoryType container : { InventoryType::Bag0, InventoryType::Bag1, InventoryType::Bag2, InventoryType::Bag3 } )
   {
     const auto& storage = m_storageMap[ container ];
     slots += ( storage->getMaxSize() - storage->getEntryCount() );
@@ -953,7 +812,7 @@ uint8_t Sapphire::Entity::Player::getFreeSlotsInBags()
 bool Sapphire::Entity::Player::collectHandInItems( std::vector< uint32_t > itemIds )
 {
   // todo: figure out how the game gets the required stack count
-  const auto& container = m_storageMap[ HandIn ];
+  const auto& container = m_storageMap[ InventoryType::HandIn ];
 
   std::vector< uint8_t > foundItems;
 
@@ -1003,7 +862,7 @@ Sapphire::ItemPtr Sapphire::Entity::Player::dropInventoryItem( Sapphire::Common:
 
   if( !silent )
   {
-    auto invUpdate = std::make_shared< UpdateInventorySlotPacket >( getId(), slotId, static_cast< uint16_t >( type ) );
+    auto invUpdate = std::make_shared< UpdateInventorySlotPacket >( getId(), slotId, type );
     queuePacket( invUpdate );
   }
 
@@ -1030,7 +889,7 @@ Sapphire::ItemPtr Sapphire::Entity::Player::dropInventoryItem( Sapphire::Common:
 
 bool Sapphire::Entity::Player::getFreeInventoryContainerSlot( Inventory::InventoryContainerPair& containerPair ) const
 {
-  for( auto bagId : { Bag0, Bag1, Bag2, Bag3 } )
+  for( auto bagId : { InventoryType::Bag0, InventoryType::Bag1, InventoryType::Bag2, InventoryType::Bag3 } )
   {
     auto needle = m_storageMap.find( bagId );
     if( needle == m_storageMap.end() )
@@ -1052,7 +911,7 @@ bool Sapphire::Entity::Player::getFreeInventoryContainerSlot( Inventory::Invento
   return false;
 }
 
-void Sapphire::Entity::Player::insertInventoryItem( Sapphire::Common::InventoryType type, uint16_t slot,
+void Sapphire::Entity::Player::insertInventoryItem( Sapphire::Common::InventoryType type, uint8_t slot,
                                                     const Sapphire::ItemPtr item )
 {
   updateContainer( type, slot, item );
@@ -1065,7 +924,7 @@ void Sapphire::Entity::Player::insertInventoryItem( Sapphire::Common::InventoryT
 bool Sapphire::Entity::Player::findFirstItemWithId( uint32_t catalogId,
                                                     Inventory::InventoryContainerPair& location )
 {
-  for( auto bagId : { Bag0, Bag1, Bag2, Bag3 } )
+  for( auto bagId : { InventoryType::Bag0, InventoryType::Bag1, InventoryType::Bag2, InventoryType::Bag3 } )
   {
     auto& container = m_storageMap[ bagId ];
 

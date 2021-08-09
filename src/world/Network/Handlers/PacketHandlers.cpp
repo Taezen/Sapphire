@@ -72,8 +72,6 @@ void Sapphire::Network::GameConnection::setSearchInfoHandler( const Packets::FFX
 {
   const auto packet = ZoneChannelPacket< Client::FFXIVIpcSetSearchInfo >( inPacket );
 
-  const auto inval = packet.data().status1;
-  const auto inval1 = packet.data().status2;
   const auto status = packet.data().status;
   const auto selectRegion = packet.data().language;
 
@@ -81,10 +79,10 @@ void Sapphire::Network::GameConnection::setSearchInfoHandler( const Packets::FFX
 
   player.setOnlineStatusMask( status );
 
-  if( player.isNewAdventurer() && !( inval & 0x01000000 ) )
+  if( player.isNewAdventurer() && !( ( status >> static_cast< uint8_t >( OnlineStatus::NewAdventurer ) ) & 0x01 ) )
     // mark player as not new adventurer anymore
     player.setNewAdventurer( false );
-  else if( inval & 0x01000000 )
+  else if( ( status >> static_cast< uint8_t >( OnlineStatus::NewAdventurer ) ) & 0x01 )
     // mark player as new adventurer
     player.setNewAdventurer( true );
 
@@ -244,6 +242,15 @@ void Sapphire::Network::GameConnection::updatePositionHandler( const Packets::FF
       player.m_falling = false;
     }
   }
+  if ( animationType & MoveType::Flying )
+  {
+    if ( !player.hasStateFlag( PlayerStateFlag::IsFlying ) )
+      player.setStateFlag( PlayerStateFlag::IsFlying );
+  }
+  else
+  {
+    player.unsetStateFlag( PlayerStateFlag::IsFlying );
+  }
 
   if( player.m_falling )
   {
@@ -392,9 +399,7 @@ void Sapphire::Network::GameConnection::finishLoadingHandler( const Packets::FFX
   // TODO: load and save this data instead of hardcoding
   auto gcPacket = makeZonePacket< FFXIVGCAffiliation >( player.getId() );
   gcPacket->data().gcId = player.getGc();
-  gcPacket->data().gcRank[ 0 ] = player.getGcRankArray()[ 0 ];
-  gcPacket->data().gcRank[ 1 ] = player.getGcRankArray()[ 1 ];
-  gcPacket->data().gcRank[ 2 ] = player.getGcRankArray()[ 2 ];
+  memcpy( gcPacket->data().gcRank, player.getGcRankArray(), 3 );
   player.queuePacket( gcPacket );
 
   player.getCurrentTerritory()->onFinishLoading( player );

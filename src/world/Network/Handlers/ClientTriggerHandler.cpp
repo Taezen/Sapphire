@@ -287,7 +287,7 @@ void Sapphire::Network::GameConnection::clientTriggerHandler( const Packets::FFX
       // param12 = item to dye slot
       // param2 = dye bag container
       // param4 = dye bag slot
-      player.setDyeingInfo( param11, param12, param2, param4 );
+      player.setDyeingInfo( static_cast< Common::InventoryType >( param11 ), param12, static_cast< Common::InventoryType >( param2 ), param4 );
       break;
     }
     case ClientTriggerType::DirectorInitFinish: // Director init finish
@@ -298,6 +298,20 @@ void Sapphire::Network::GameConnection::clientTriggerHandler( const Packets::FFX
     case ClientTriggerType::DirectorSync: // Director init finish
     {
       player.getCurrentTerritory()->onDirectorSync( player );
+      break;
+    }
+    case ClientTriggerType::ReqFateInfo: // this got send when the client receives an "InitFate"-ActorControlSelf packet
+    {
+      auto fateSetup = makeZonePacket< FFXIVIpcFateSetup >( player.getId() );
+      fateSetup->data().fateId = param1;
+      fateSetup->data().startTimestamp = _time32( nullptr ); // this will do it for now
+      fateSetup->data().fateLength = 900; // standard fate length
+      player.queuePacket( fateSetup );
+
+      player.queuePacket( makeActorControlSelf( player.getId(), FateState, param1, 2 ) );
+      
+      player.queuePacket( makeActorControlSelf( player.getId(), FateUnknown, param1 ) );
+
       break;
     }
     case ClientTriggerType::EnterTerritoryEventFinished:// this may still be something else. I think i have seen it elsewhere
@@ -425,7 +439,7 @@ void Sapphire::Network::GameConnection::clientTriggerHandler( const Packets::FFX
 
       auto& housingMgr = Common::Service< HousingMgr >::ref();
 
-      uint16_t inventoryType = Common::InventoryType::HousingExteriorPlacedItems;
+      Common::InventoryType inventoryType = Common::InventoryType::HousingExteriorPlacedItems;
       if( param2 == 1 )
         inventoryType = Common::InventoryType::HousingExteriorStoreroom;
 
@@ -455,7 +469,7 @@ void Sapphire::Network::GameConnection::clientTriggerHandler( const Packets::FFX
       auto sendToStoreroom = ( param4 >> 16 ) != 0;
 
       //player, plot, containerId, slot, sendToStoreroom
-      housingMgr.reqRemoveHousingItem( player, static_cast< uint16_t >( param12 ), static_cast< uint16_t >( param2 ), static_cast< uint8_t >( slot ), sendToStoreroom );
+      housingMgr.reqRemoveHousingItem( player, static_cast< uint16_t >( param12 ), static_cast< Common::InventoryType >( param2 ), static_cast< uint8_t >( slot ), sendToStoreroom );
 
       break;
     }
