@@ -8,8 +8,6 @@
 #include "Vector3.h"
 #include "Network/PacketDef/Ipcs.h"
 
-#include "Network/PacketDef/Ipcs.h"
-
 // +---------------------------------------------------------------------------
 // The following enumerations are structures to require their type be included.
 // They are also defined within the Sapphire::Common namespace to avoid collisions.

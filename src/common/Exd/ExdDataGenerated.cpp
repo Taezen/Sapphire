@@ -9004,13 +9004,6 @@ Sapphire::Data::QuestAcceptAdditionCondition::QuestAcceptAdditionCondition( uint
   requirement1 = exdData->getField< uint32_t >( row, 1 );
 }
 
-Sapphire::Data::QuestAcceptAdditionCondition::QuestAcceptAdditionCondition( uint32_t row_id, Sapphire::Data::ExdDataGenerated* exdData )
-{
-  auto row = exdData->m_QuestAcceptAdditionConditionDat.get_row( row_id );
-  requirement0 = exdData->getField< uint32_t >( row, 0 );
-  requirement1 = exdData->getField< uint32_t >( row, 1 );
-}
-
 Sapphire::Data::QuestBattle::QuestBattle( uint32_t row_id, Sapphire::Data::ExdDataGenerated* exdData )
 {
   auto row = exdData->m_QuestBattleDat.get_row( row_id );

@@ -235,7 +235,7 @@ namespace Sapphire::Network::Packets
     MSQTrackerComplete = 0x01C1, // updated 5.58
     MSQTrackerProgress = 0xF1CD, // updated 4.5 ? this actually looks like the two opcodes have been combined, see #474
 
-    QuestMessage = 0x0399, // updated 5.55 hotfix
+    QuestMessage = 0x0128, // updated 5.58
 
     QuestTracker = 0x038E, // updated 5.58
 

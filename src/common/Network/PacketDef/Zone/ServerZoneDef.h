@@ -974,7 +974,7 @@ namespace Sapphire::Network::Packets::Server
     uint16_t unknown_3;
   };
 
-  struct FFXIVIpcBossHateList : FFXIVIpcBasePacket< HateListTarget >
+  struct FFXIVIpcHateListTarget : FFXIVIpcBasePacket< HateListTarget >
   {
     uint8_t numEntries;
     uint8_t padding0[3];
@@ -1264,7 +1264,6 @@ namespace Sapphire::Network::Packets::Server
     uint8_t unlockedRaids[28];
     uint8_t unlockedDungeons[18];
     uint8_t unlockedGuildhests[10];
->>>>>>> 6a283be9e09fac2a54a25e93163c0afe9b488480
     /*
       at least 8 bytes at most 10 bytes in unlockedTrials not confirmed, adjust unlockedPvp so they share a total of 15 bytes and sync with clearedTrials/clearedPvp.
     */
