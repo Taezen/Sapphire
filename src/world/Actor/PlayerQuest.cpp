@@ -7,6 +7,8 @@
 #include "Network/GameConnection.h"
 #include "Network/PacketWrappers/QuestMessagePacket.h"
 
+#include "Manager/MapMgr.h"
+
 #include "Session.h"
 
 using namespace Sapphire::Common;
@@ -42,6 +44,11 @@ void Sapphire::Entity::Player::removeQuest( uint16_t questId )
 
   if( ( idx != -1 ) && ( m_activeQuests[ idx ] != nullptr ) )
   {
+    std::shared_ptr< QuestActive > pQuest = m_activeQuests[ idx ];
+    m_activeQuests[ idx ].reset();
+
+    Common::Service< World::Manager::MapMgr >::ref().updateQuests( *this );
+
     auto questUpdatePacket = makeZonePacket< FFXIVIpcQuestUpdate >( getId() );
     questUpdatePacket->data().slot = static_cast< uint8_t >( idx );
     questUpdatePacket->data().questInfo.c.questId = 0;
@@ -53,9 +60,6 @@ void Sapphire::Entity::Player::removeQuest( uint16_t questId )
       if( m_questTracking[ ii ] == idx )
         m_questTracking[ ii ] = -1;
     }
-
-    std::shared_ptr< QuestActive > pQuest = m_activeQuests[ idx ];
-    m_activeQuests[ idx ].reset();
 
     m_questIdToQuestIdx.erase( questId );
     m_questIdxToQuestId.erase( idx );
@@ -87,7 +91,7 @@ bool Sapphire::Entity::Player::getQuestBitFlag8( uint16_t questId, uint8_t index
   if( idx != -1 )
   {
     std::shared_ptr< QuestActive > pNewQuest = m_activeQuests[ idx ];
-    return pNewQuest->a.BitFlag8 & ( 1 << index );
+    return pNewQuest->a.BitFlag8 & ( 1 << ( 8 - index ) );
   }
 
   return false;
@@ -100,7 +104,7 @@ bool Sapphire::Entity::Player::getQuestBitFlag16( uint16_t questId, uint8_t inde
   if( idx != -1 )
   {
     std::shared_ptr< QuestActive > pNewQuest = m_activeQuests[ idx ];
-    return pNewQuest->a.BitFlag16 & ( 1 << index );
+    return pNewQuest->a.BitFlag16 & ( 1 << ( 8 - index ) );
   }
 
   return false;
@@ -113,7 +117,7 @@ bool Sapphire::Entity::Player::getQuestBitFlag24( uint16_t questId, uint8_t inde
   if( idx != -1 )
   {
     std::shared_ptr< QuestActive > pNewQuest = m_activeQuests[ idx ];
-    return pNewQuest->a.BitFlag24 & ( 1 << index );
+    return pNewQuest->a.BitFlag24 & ( 1 << ( 8 - index ) );
   }
 
   return false;
@@ -126,7 +130,7 @@ bool Sapphire::Entity::Player::getQuestBitFlag32( uint16_t questId, uint8_t inde
   if( idx != -1 )
   {
     std::shared_ptr< QuestActive > pNewQuest = m_activeQuests[ idx ];
-    return pNewQuest->a.BitFlag32 & ( 1 << index );
+    return pNewQuest->a.BitFlag32 & ( 1 << ( 8 - index ) );
   }
 
   return false;
@@ -139,7 +143,7 @@ bool Sapphire::Entity::Player::getQuestBitFlag40( uint16_t questId, uint8_t inde
   if( idx != -1 )
   {
     std::shared_ptr< QuestActive > pNewQuest = m_activeQuests[ idx ];
-    return pNewQuest->a.BitFlag40 & ( 1 << index );
+    return pNewQuest->a.BitFlag40 & ( 1 << ( 8 - index ) );
   }
 
   return false;
@@ -152,7 +156,7 @@ bool Sapphire::Entity::Player::getQuestBitFlag48( uint16_t questId, uint8_t inde
   if( idx != -1 )
   {
     std::shared_ptr< QuestActive > pNewQuest = m_activeQuests[ idx ];
-    return pNewQuest->a.BitFlag48 & ( 1 << index );
+    return pNewQuest->a.BitFlag48 & ( 1 << ( 8 - index ) );
   }
 
   return false;
@@ -444,7 +448,7 @@ uint32_t Sapphire::Entity::Player::getQuestUI32A( uint16_t questId )
   return value;
 }
 
-void Sapphire::Entity::Player::setQuestUI8A( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8A( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -454,11 +458,12 @@ void Sapphire::Entity::Player::setQuestUI8A( uint16_t questId, uint8_t val )
 
     pNewQuest->c.UI8A = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8B( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8B( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -468,11 +473,12 @@ void Sapphire::Entity::Player::setQuestUI8B( uint16_t questId, uint8_t val )
 
     pNewQuest->c.UI8B = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8C( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8C( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -482,11 +488,12 @@ void Sapphire::Entity::Player::setQuestUI8C( uint16_t questId, uint8_t val )
 
     pNewQuest->c.UI8C = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8D( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8D( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -496,11 +503,12 @@ void Sapphire::Entity::Player::setQuestUI8D( uint16_t questId, uint8_t val )
 
     pNewQuest->c.UI8D = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8E( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8E( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -510,11 +518,12 @@ void Sapphire::Entity::Player::setQuestUI8E( uint16_t questId, uint8_t val )
 
     pNewQuest->c.UI8E = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8F( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8F( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -524,11 +533,12 @@ void Sapphire::Entity::Player::setQuestUI8F( uint16_t questId, uint8_t val )
 
     pNewQuest->c.UI8F = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8AH( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8AH( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -538,11 +548,12 @@ void Sapphire::Entity::Player::setQuestUI8AH( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8AH = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8BH( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8BH( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -552,11 +563,12 @@ void Sapphire::Entity::Player::setQuestUI8BH( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8BH = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8CH( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8CH( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -566,11 +578,12 @@ void Sapphire::Entity::Player::setQuestUI8CH( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8CH = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8DH( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8DH( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -580,11 +593,12 @@ void Sapphire::Entity::Player::setQuestUI8DH( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8DH = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8EH( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8EH( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -594,11 +608,12 @@ void Sapphire::Entity::Player::setQuestUI8EH( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8EH = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8FH( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8FH( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -608,11 +623,12 @@ void Sapphire::Entity::Player::setQuestUI8FH( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8FH = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8AL( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8AL( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -622,11 +638,12 @@ void Sapphire::Entity::Player::setQuestUI8AL( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8AL = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8BL( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8BL( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -636,11 +653,12 @@ void Sapphire::Entity::Player::setQuestUI8BL( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8BL = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8CL( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8CL( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -650,11 +668,12 @@ void Sapphire::Entity::Player::setQuestUI8CL( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8CL = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8DL( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8DL( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -664,11 +683,12 @@ void Sapphire::Entity::Player::setQuestUI8DL( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8DL = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8EL( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8EL( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -678,11 +698,12 @@ void Sapphire::Entity::Player::setQuestUI8EL( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8EL = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI8FL( uint16_t questId, uint8_t val )
+void Sapphire::Entity::Player::setQuestUI8FL( uint16_t questId, uint8_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -692,11 +713,12 @@ void Sapphire::Entity::Player::setQuestUI8FL( uint16_t questId, uint8_t val )
 
     pNewQuest->b.UI8FL = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI16A( uint16_t questId, uint16_t val )
+void Sapphire::Entity::Player::setQuestUI16A( uint16_t questId, uint16_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -706,11 +728,12 @@ void Sapphire::Entity::Player::setQuestUI16A( uint16_t questId, uint16_t val )
 
     //   pNewQuest->d.UI16A = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI16B( uint16_t questId, uint16_t val )
+void Sapphire::Entity::Player::setQuestUI16B( uint16_t questId, uint16_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -720,11 +743,12 @@ void Sapphire::Entity::Player::setQuestUI16B( uint16_t questId, uint16_t val )
 
     //  pNewQuest->d.UI16B = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI16C( uint16_t questId, uint16_t val )
+void Sapphire::Entity::Player::setQuestUI16C( uint16_t questId, uint16_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -734,11 +758,12 @@ void Sapphire::Entity::Player::setQuestUI16C( uint16_t questId, uint16_t val )
 
 //      pNewQuest->d.UI16C = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestUI32A( uint16_t questId, uint32_t val )
+void Sapphire::Entity::Player::setQuestUI32A( uint16_t questId, uint32_t val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -748,11 +773,12 @@ void Sapphire::Entity::Player::setQuestUI32A( uint16_t questId, uint32_t val )
 
     // pNewQuest->e.UI32A = val;
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestBitFlag8( uint16_t questId, uint8_t index, bool val )
+void Sapphire::Entity::Player::setQuestBitFlag8( uint16_t questId, uint8_t index, bool val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -767,11 +793,12 @@ void Sapphire::Entity::Player::setQuestBitFlag8( uint16_t questId, uint8_t index
     else
       pNewQuest->a.BitFlag8 &= ~( 1 << realIdx );
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestBitFlag16( uint16_t questId, uint8_t index, bool val )
+void Sapphire::Entity::Player::setQuestBitFlag16( uint16_t questId, uint8_t index, bool val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -786,11 +813,12 @@ void Sapphire::Entity::Player::setQuestBitFlag16( uint16_t questId, uint8_t inde
     else
       pNewQuest->a.BitFlag16 &= ~( 1 << realIdx );
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestBitFlag24( uint16_t questId, uint8_t index, bool val )
+void Sapphire::Entity::Player::setQuestBitFlag24( uint16_t questId, uint8_t index, bool val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -805,11 +833,12 @@ void Sapphire::Entity::Player::setQuestBitFlag24( uint16_t questId, uint8_t inde
     else
       pNewQuest->a.BitFlag24 &= ~( 1 << realIdx );
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestBitFlag32( uint16_t questId, uint8_t index, bool val )
+void Sapphire::Entity::Player::setQuestBitFlag32( uint16_t questId, uint8_t index, bool val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -824,11 +853,12 @@ void Sapphire::Entity::Player::setQuestBitFlag32( uint16_t questId, uint8_t inde
     else
       pNewQuest->a.BitFlag32 &= ~( 1 << realIdx );
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestBitFlag40( uint16_t questId, uint8_t index, bool val )
+void Sapphire::Entity::Player::setQuestBitFlag40( uint16_t questId, uint8_t index, bool val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -843,11 +873,12 @@ void Sapphire::Entity::Player::setQuestBitFlag40( uint16_t questId, uint8_t inde
     else
       pNewQuest->a.BitFlag40 &= ~( 1 << realIdx );
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
-void Sapphire::Entity::Player::setQuestBitFlag48( uint16_t questId, uint8_t index, bool val )
+void Sapphire::Entity::Player::setQuestBitFlag48( uint16_t questId, uint8_t index, bool val, bool sendUpdate )
 {
   int8_t idx = getQuestIndex( questId );
 
@@ -862,7 +893,8 @@ void Sapphire::Entity::Player::setQuestBitFlag48( uint16_t questId, uint8_t inde
     else
       pNewQuest->a.BitFlag48 &= ~( 1 << realIdx );
 
-    updateQuest( questId, pNewQuest->c.sequence );
+    if( sendUpdate )
+      updateQuest( questId, pNewQuest->c.sequence );
   }
 }
 
@@ -877,6 +909,19 @@ uint8_t Sapphire::Entity::Player::getQuestSeq( uint16_t questId )
     return pNewQuest->c.sequence;
   }
   return 0;
+}
+
+Sapphire::Common::ClassJob Sapphire::Entity::Player::getQuestClassAccepted( uint16_t questId )
+{
+  int8_t idx = getQuestIndex( questId );
+  uint8_t value = 0;
+  if( idx != -1 )
+  {
+    std::shared_ptr< QuestActive > pNewQuest = m_activeQuests[ idx ];
+    value = pNewQuest->c.classAccepted;
+  }
+
+  return static_cast< Common::ClassJob >( value );
 }
 
 void Sapphire::Entity::Player::updateQuest( uint16_t questId, uint8_t sequence )
@@ -911,10 +956,12 @@ void Sapphire::Entity::Player::updateQuest( uint16_t questId, uint8_t sequence )
     std::shared_ptr< QuestActive > pNewQuest( new QuestActive() );
     pNewQuest->c.questId = questId;
     pNewQuest->c.sequence = sequence;
-    pNewQuest->c.padding = 0;
+    pNewQuest->c.classAccepted = static_cast< uint8_t >( getClass() );
     m_activeQuests[ idx ] = pNewQuest;
     m_questIdToQuestIdx[ questId ] = idx;
     m_questIdxToQuestId[ idx ] = questId;
+
+    Common::Service< World::Manager::MapMgr >::ref().updateQuests( *this );
 
     auto questUpdatePacket = makeZonePacket< FFXIVIpcQuestUpdate >( getId() );
     questUpdatePacket->data().slot = idx;
@@ -1013,6 +1060,11 @@ Sapphire::Entity::Player::sendQuestMessage( uint32_t questId, int8_t msgId, uint
 }
 
 
+bool Sapphire::Entity::Player::isQuestCompleted( uint16_t questId )
+{
+  return ( m_questCompleteFlags[ questId / 8 ] & ( 0x80 >> ( questId % 8 ) ) );
+}
+
 void Sapphire::Entity::Player::updateQuestsCompleted( uint32_t questId )
 {
   uint16_t index = questId / 8;
@@ -1032,6 +1084,7 @@ void Sapphire::Entity::Player::removeQuestsCompleted( uint32_t questId )
 
   m_questCompleteFlags[ index ] ^= value;
 
+  Common::Service< World::Manager::MapMgr >::ref().updateQuests( *this );
 }
 
 bool Sapphire::Entity::Player::giveQuestRewards( uint32_t questId, uint32_t optionalChoice )

@@ -174,6 +174,9 @@ namespace Sapphire::Entity
     /*! return the current quest sequence */
     uint8_t getQuestSeq( uint16_t questId );
 
+    /*! return the class the quest was accepted with */
+    Common::ClassJob getQuestClassAccepted( uint16_t questId );
+
     /*! send the quest tracker packet */
     void sendQuestTracker();
 
@@ -191,6 +194,8 @@ namespace Sapphire::Entity
 
     /*! remove a given quest */
     void removeQuest( uint16_t questId );
+
+    bool isQuestCompleted( uint16_t questId );
 
     /*! add a quest to the completed quests mask */
     void updateQuestsCompleted( uint32_t questId );
@@ -265,61 +270,61 @@ namespace Sapphire::Entity
     bool getQuestBitFlag48( uint16_t questId, uint8_t index );
 
 
-    void setQuestUI8A( uint16_t questId, uint8_t val );
+    void setQuestUI8A( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8B( uint16_t questId, uint8_t val );
+    void setQuestUI8B( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8C( uint16_t questId, uint8_t val );
+    void setQuestUI8C( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8D( uint16_t questId, uint8_t val );
+    void setQuestUI8D( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8E( uint16_t questId, uint8_t val );
+    void setQuestUI8E( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8F( uint16_t questId, uint8_t val );
+    void setQuestUI8F( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8AH( uint16_t questId, uint8_t val );
+    void setQuestUI8AH( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8BH( uint16_t questId, uint8_t val );
+    void setQuestUI8BH( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8CH( uint16_t questId, uint8_t val );
+    void setQuestUI8CH( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8DH( uint16_t questId, uint8_t val );
+    void setQuestUI8DH( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8EH( uint16_t questId, uint8_t val );
+    void setQuestUI8EH( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8FH( uint16_t questId, uint8_t val );
+    void setQuestUI8FH( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8AL( uint16_t questId, uint8_t val );
+    void setQuestUI8AL( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8BL( uint16_t questId, uint8_t val );
+    void setQuestUI8BL( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8CL( uint16_t questId, uint8_t val );
+    void setQuestUI8CL( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8DL( uint16_t questId, uint8_t val );
+    void setQuestUI8DL( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8EL( uint16_t questId, uint8_t val );
+    void setQuestUI8EL( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI8FL( uint16_t questId, uint8_t val );
+    void setQuestUI8FL( uint16_t questId, uint8_t val, bool sendUpdate = true );
 
-    void setQuestUI16A( uint16_t questId, uint16_t val );
+    void setQuestUI16A( uint16_t questId, uint16_t val, bool sendUpdate = true );
 
-    void setQuestUI16B( uint16_t questId, uint16_t val );
+    void setQuestUI16B( uint16_t questId, uint16_t val, bool sendUpdate = true );
 
-    void setQuestUI16C( uint16_t questId, uint16_t val );
+    void setQuestUI16C( uint16_t questId, uint16_t val, bool sendUpdate = true );
 
-    void setQuestUI32A( uint16_t questId, uint32_t val );
+    void setQuestUI32A( uint16_t questId, uint32_t val, bool sendUpdate = true );
 
-    void setQuestBitFlag8( uint16_t questId, uint8_t index, bool val );
+    void setQuestBitFlag8( uint16_t questId, uint8_t index, bool val, bool sendUpdate = true );
 
-    void setQuestBitFlag16( uint16_t questId, uint8_t index, bool val );
+    void setQuestBitFlag16( uint16_t questId, uint8_t index, bool val, bool sendUpdate = true );
 
-    void setQuestBitFlag24( uint16_t questId, uint8_t index, bool val );
+    void setQuestBitFlag24( uint16_t questId, uint8_t index, bool val, bool sendUpdate = true );
 
-    void setQuestBitFlag32( uint16_t questId, uint8_t index, bool val );
+    void setQuestBitFlag32( uint16_t questId, uint8_t index, bool val, bool sendUpdate = true );
 
-    void setQuestBitFlag40( uint16_t questId, uint8_t index, bool val );
+    void setQuestBitFlag40( uint16_t questId, uint8_t index, bool val, bool sendUpdate = true );
 
-    void setQuestBitFlag48( uint16_t questId, uint8_t index, bool val );
+    void setQuestBitFlag48( uint16_t questId, uint8_t index, bool val, bool sendUpdate = true );
 
     // Inventory / Item / Currency
     //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -633,7 +638,7 @@ namespace Sapphire::Entity
     void learnSong( uint8_t songId, uint32_t itemId );
 
     /*! check if an action is already unlocked in the bitmask. */
-    bool isActionLearned( uint8_t actionId ) const;
+    bool isActionLearned( uint16_t actionId ) const;
 
     /*! return a const pointer to the unlock bitmask array */
     const uint8_t* getUnlockBitmask() const;
@@ -643,6 +648,8 @@ namespace Sapphire::Entity
 
     /*! return a const pointer to the mount guide bitmask array */
     const uint8_t* getMountGuideBitmask() const;
+
+    const bool hasMount( int16_t mountId ) const;
 
     bool checkAction() override;
 
@@ -945,6 +952,8 @@ namespace Sapphire::Entity
     uint16_t calculateEquippedGearItemLevel();
 
     ItemPtr getEquippedWeapon();
+
+    ItemPtr getEquippedSecondaryWeapon();
 
     void writeInventory( Common::InventoryType type );
 

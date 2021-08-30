@@ -798,6 +798,11 @@ Sapphire::ItemPtr Sapphire::Entity::Player::getEquippedWeapon()
   return m_storageMap[ InventoryType::GearSet0 ]->getItem( GearSetSlot::MainHand );
 }
 
+Sapphire::ItemPtr Sapphire::Entity::Player::getEquippedSecondaryWeapon()
+{
+	return m_storageMap[ InventoryType::GearSet0 ]->getItem( GearSetSlot::OffHand );
+}
+
 uint8_t Sapphire::Entity::Player::getFreeSlotsInBags()
 {
   uint8_t slots = 0;
