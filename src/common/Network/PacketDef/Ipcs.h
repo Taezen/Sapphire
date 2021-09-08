@@ -94,7 +94,7 @@ namespace Sapphire::Network::Packets
 
     ServerNoticeShort = 0x0333, // updated 5.58 hotfix
     ServerNotice = 0x0171, // updated 5.58 hotfix
-    SetOnlineStatus = 0x017B, // updated 5.58 hotfix
+    SetOnlineStatus = 0x037B, // updated 5.58 hotfix
 
     CountdownInitiate = 0x0111, // updated 5.58 hotfix
     CountdownCancel = 0x0231, // updated 5.58 hotfix
